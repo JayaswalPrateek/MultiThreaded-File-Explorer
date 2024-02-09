@@ -2,15 +2,21 @@ package core;
 
 interface Entity {
 
-    ErrorCode create();
+    ErrorCode create(final String name); // defaults to current path
 
-    ErrorCode copy();
+    ErrorCode create(final String name, final String destination);
+
+    ErrorCode copy(final String destination); // defaults to current name
+
+    ErrorCode copy(final String newName, final String destination);
 
     ErrorCode delete();
 
-    ErrorCode move();
+    ErrorCode move(final String destination); // defaults to current name
 
-    ErrorCode rename();
+    ErrorCode move(final String newName, final String destination);
+
+    ErrorCode rename(final String newName);
 
 }
 
@@ -23,7 +29,9 @@ interface File extends Entity {
 interface Folder extends Entity {
     ErrorCode list();
 
-    ErrorCode stepIn();
+    ErrorCode regexFilter(final String pattern);
+
+    ErrorCode stepIn(final String target);
 
     ErrorCode stepOut();
 }
