@@ -22,13 +22,13 @@ interface Entity extends Runnable {
 
 }
 
-interface File extends Entity {
+interface iFile extends Entity {
     ErrorCode open();
 
     ErrorCode properties();
 }
 
-interface Folder extends Entity {
+interface iFolder extends Entity {
     ErrorCode list();
 
     ErrorCode regexFilter(final String pattern);
