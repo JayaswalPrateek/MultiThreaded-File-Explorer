@@ -7,7 +7,7 @@ import java.util.Set;
 interface Entity extends Runnable {
     boolean DEBUG = true;
 
-    static class criticalSectionHandler {
+    static class CriticalSectionHandler {
         private static final Set<Entity> lockedEntities = Collections.synchronizedSet(new HashSet<>());
 
         private static synchronized boolean lock(final Entity... entities) {
