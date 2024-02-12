@@ -1,6 +1,17 @@
 package core;
 
 final class FileImpl implements File {
+    String name, path;
+
+    FileImpl(final String name, final String path) {
+        this.name = name;
+        this.path = path;
+    }
+
+    FileImpl(final String name, final String path, final FileImpl obj) {
+        this(name,path);
+        // copy contents in obj to this
+    }
 
     @Override
     public ErrorCode create(String... names) {
