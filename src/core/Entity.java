@@ -10,21 +10,29 @@ interface Entity extends Runnable {
     static class criticalSectionHandler {
         private static final Set<Entity> lockedEntities = Collections.synchronizedSet(new HashSet<>());
 
-        private static boolean lock(final Entity entity) {
-            return lockedEntities.add(entity);
+        private static synchronized boolean lock(final Entity... entities) {
+            boolean successTracker = true;
+            for (final Entity entity : entities)
+                successTracker = successTracker && lockedEntities.add(entity);
+            if (!successTracker)
+                System.exit(1);
+            return successTracker;
         }
 
-        private static boolean unlock(final Entity entity) {
-            return lockedEntities.remove(entity);
+        private static synchronized boolean unlock(final Entity... entities) {
+            boolean successTracker = true;
+            for (final Entity entity : entities)
+                successTracker = successTracker && lockedEntities.remove(entity);
+            if (!successTracker)
+                System.exit(1);
+            return successTracker;
         }
 
-        public static void getLockedEntities() {
+        public static synchronized void getLockedEntities() {
             if (!DEBUG)
                 return;
-            synchronized (lockedEntities) {
-                for (final Entity entity : lockedEntities)
-                    System.out.println(entity);
-            }
+            for (final Entity entity : lockedEntities)
+                System.out.println(entity);
         }
     }
 
