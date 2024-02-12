@@ -14,6 +14,8 @@ interface Entity extends Runnable {
             boolean successTracker = true;
             for (final Entity entity : entities)
                 successTracker = successTracker && lockedEntities.add(entity);
+            if (!successTracker && DEBUG)
+                System.out.println("Cannot recover from partial locking");
             if (!successTracker)
                 System.exit(1);
             return successTracker;
@@ -23,6 +25,8 @@ interface Entity extends Runnable {
             boolean successTracker = true;
             for (final Entity entity : entities)
                 successTracker = successTracker && lockedEntities.remove(entity);
+            if (!successTracker && DEBUG)
+                System.out.println("Cannot recover from partial unlocking");
             if (!successTracker)
                 System.exit(1);
             return successTracker;
