@@ -1,6 +1,22 @@
 package core;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 interface Entity extends Runnable {
+
+    static class criticalSectionHandler {
+        private static final Set<Entity> lockedEntities = Collections.synchronizedSet(new HashSet<>());
+
+        public static boolean lock(final Entity entity) {
+            return lockedEntities.add(entity);
+        }
+
+        public static boolean unlock(final Entity entity) {
+            return lockedEntities.remove(entity);
+        }
+    }
 
     ErrorCode create(final String... names);
 
