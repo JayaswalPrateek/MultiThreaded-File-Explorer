@@ -1,6 +1,6 @@
 package core;
 
-final class File implements iFile {
+final class FolderImpl implements Folder {
 
     @Override
     public ErrorCode create(String... names) {
@@ -63,14 +63,26 @@ final class File implements iFile {
     }
 
     @Override
-    public ErrorCode open() {
+    public ErrorCode list() {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'open'");
+        throw new UnsupportedOperationException("Unimplemented method 'list'");
     }
 
     @Override
-    public ErrorCode properties() {
+    public ErrorCode regexFilter(String pattern) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'properties'");
+        throw new UnsupportedOperationException("Unimplemented method 'regexFilter'");
+    }
+
+    @Override
+    public ErrorCode stepIn(String target) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'stepIn'");
+    }
+
+    @Override
+    public ErrorCode stepOut() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'stepOut'");
     }
 }

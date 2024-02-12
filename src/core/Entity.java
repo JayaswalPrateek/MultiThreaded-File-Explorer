@@ -38,13 +38,13 @@ interface Entity extends Runnable {
 
 }
 
-interface iFile extends Entity {
+interface File extends Entity {
     ErrorCode open();
 
     ErrorCode properties();
 }
 
-interface iFolder extends Entity {
+interface Folder extends Entity {
     ErrorCode list();
 
     ErrorCode regexFilter(final String pattern);
