@@ -30,6 +30,11 @@ final class FileImpl implements File {
     }
 
     @Override
+    public String toString() {
+        return path + name;
+    }
+
+    @Override
     public ErrorCode create(String... names) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'create'");
