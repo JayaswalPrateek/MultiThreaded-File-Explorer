@@ -11,25 +11,32 @@ interface Entity extends Runnable {
         private static final Set<Entity> lockedEntities = Collections.synchronizedSet(new HashSet<>());
 
         private static synchronized boolean lock(final Entity... entities) {
-            boolean successTracker = true;
+            boolean allLockedSuccessfully = true;
             for (final Entity entity : entities)
-                successTracker = successTracker && lockedEntities.add(entity);
-            if (!successTracker && DEBUG)
+                allLockedSuccessfully = allLockedSuccessfully && lockedEntities.add(entity);
+            if (!allLockedSuccessfully && DEBUG)
                 System.out.println("Cannot recover from partial locking");
-            if (!successTracker)
+            if (!allLockedSuccessfully)
                 System.exit(1);
-            return successTracker;
+            return allLockedSuccessfully;
         }
 
         private static synchronized boolean unlock(final Entity... entities) {
-            boolean successTracker = true;
+            boolean allUnlockedSuccessfully = true;
             for (final Entity entity : entities)
-                successTracker = successTracker && lockedEntities.remove(entity);
-            if (!successTracker && DEBUG)
+                allUnlockedSuccessfully = allUnlockedSuccessfully && lockedEntities.remove(entity);
+            if (!allUnlockedSuccessfully && DEBUG)
                 System.out.println("Cannot recover from partial unlocking");
-            if (!successTracker)
+            if (!allUnlockedSuccessfully)
                 System.exit(1);
-            return successTracker;
+            return allUnlockedSuccessfully;
+        }
+
+        private static synchronized boolean isLocked(final Entity... entities) {
+            for (final Entity entity : entities)
+                if (lockedEntities.contains(entity))
+                    return true;
+            return false;
         }
 
         public static synchronized void getLockedEntities() {
