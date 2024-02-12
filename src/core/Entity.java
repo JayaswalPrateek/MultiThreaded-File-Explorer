@@ -5,16 +5,26 @@ import java.util.HashSet;
 import java.util.Set;
 
 interface Entity extends Runnable {
+    boolean DEBUG = true;
 
     static class criticalSectionHandler {
         private static final Set<Entity> lockedEntities = Collections.synchronizedSet(new HashSet<>());
 
-        public static boolean lock(final Entity entity) {
+        private static boolean lock(final Entity entity) {
             return lockedEntities.add(entity);
         }
 
-        public static boolean unlock(final Entity entity) {
+        private static boolean unlock(final Entity entity) {
             return lockedEntities.remove(entity);
+        }
+
+        public static void getLockedEntities() {
+            if (!DEBUG)
+                return;
+            synchronized (lockedEntities) {
+                for (final Entity entity : lockedEntities)
+                    System.out.println(entity);
+            }
         }
     }
 
