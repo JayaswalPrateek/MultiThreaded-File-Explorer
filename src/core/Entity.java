@@ -18,6 +18,16 @@ interface Entity extends Runnable {
         }
     }
 
+    String getName();
+
+    String getPath();
+
+    private void setName(final String name) {
+    }
+
+    private void setPath(final String path) {
+    }
+
     ErrorCode create(final String... names);
 
     ErrorCode create(final String destination, final String... names);

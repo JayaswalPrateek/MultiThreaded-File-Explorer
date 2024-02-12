@@ -1,7 +1,7 @@
 package core;
 
 final class FileImpl implements File {
-    String name, path;
+    private String name, path;
 
     FileImpl(final String name, final String path) {
         this.name = name;
@@ -9,8 +9,24 @@ final class FileImpl implements File {
     }
 
     FileImpl(final String name, final String path, final FileImpl obj) {
-        this(name,path);
+        this(name, path);
         // copy contents in obj to this
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    private void setName(final String name) {
+        this.name = name;
+    }
+
+    private void setPath(final String path) {
+        this.path = path;
     }
 
     @Override

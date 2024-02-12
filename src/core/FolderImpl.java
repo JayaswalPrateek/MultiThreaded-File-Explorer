@@ -1,7 +1,7 @@
 package core;
 
 final class FolderImpl implements Folder {
-    String name, path;
+    private String name, path;
 
     FolderImpl(final String name, final String path) {
         this.name = name;
@@ -11,6 +11,22 @@ final class FolderImpl implements Folder {
     FolderImpl(final String name, final String path, final FolderImpl obj) {
         this(name, path);
         // copy contents in obj to this
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    private void setName(final String name) {
+        this.name = name;
+    }
+
+    private void setPath(final String path) {
+        this.path = path;
     }
 
     @Override
