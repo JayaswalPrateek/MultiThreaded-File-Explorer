@@ -53,7 +53,7 @@ final class FolderImpl implements Folder {
     }
 
     @Override
-    public ErrorCode copy(String newName, String destination) {
+    public ErrorCode copy(String destination, String... newName) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'copy'");
     }

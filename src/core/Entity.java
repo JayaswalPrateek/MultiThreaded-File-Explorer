@@ -54,13 +54,13 @@ interface Entity extends Runnable {
 
     ErrorCode create(final String destination, final String... names);
 
-    ErrorCode copy(final String destination);
-
-    ErrorCode copy(final String newName, final String destination);
-
     ErrorCode delete(final String... names);
 
     ErrorCode delete(final String destination, final String... names);
+
+    ErrorCode copy(final String destination);
+
+    ErrorCode copy(final String destination, final String... newName);
 
     ErrorCode move(final String destination);
 
