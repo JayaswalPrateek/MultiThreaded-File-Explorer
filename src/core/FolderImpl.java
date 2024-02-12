@@ -31,7 +31,7 @@ final class FolderImpl implements Folder {
 
     @Override
     public String toString() {
-        return path + name;
+        return getPath() + getName();
     }
 
     @Override

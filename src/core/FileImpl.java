@@ -31,7 +31,7 @@ final class FileImpl implements File {
 
     @Override
     public String toString() {
-        return path + name;
+        return getPath() + getName();
     }
 
     @Override
