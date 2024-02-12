@@ -35,55 +35,55 @@ final class FolderImpl implements Folder {
     }
 
     @Override
-    public ErrorCode create(String... names) {
+    public ErrorCode create(final String... names) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'create'");
     }
 
     @Override
-    public ErrorCode create(String destination, String... names) {
+    public ErrorCode create(final String destination, final String... names) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'create'");
     }
 
     @Override
-    public ErrorCode copy(String destination) {
+    public ErrorCode copy(final String destination) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'copy'");
     }
 
     @Override
-    public ErrorCode copy(String destination, String... newName) {
+    public ErrorCode copy(final String destination, final String... newName) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'copy'");
     }
 
     @Override
-    public ErrorCode delete(String... names) {
+    public ErrorCode delete(final String... names) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
     @Override
-    public ErrorCode delete(String destination, String... names) {
+    public ErrorCode delete(final String destination, final String... names) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
     @Override
-    public ErrorCode move(String destination) {
+    public ErrorCode move(final String destination) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'move'");
     }
 
     @Override
-    public ErrorCode move(String destination, String... newName) {
+    public ErrorCode move(final String destination, final String... newName) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'move'");
     }
 
     @Override
-    public ErrorCode rename(String newName) {
+    public ErrorCode rename(final String newName) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'rename'");
     }
@@ -101,13 +101,13 @@ final class FolderImpl implements Folder {
     }
 
     @Override
-    public ErrorCode regexFilter(String pattern) {
+    public ErrorCode regexFilter(final String pattern) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'regexFilter'");
     }
 
     @Override
-    public ErrorCode stepIn(String target) {
+    public ErrorCode stepIn(final String target) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'stepIn'");
     }
