@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 interface Entity extends Runnable {
-    boolean DEBUG = true;
+    static boolean DEBUG = true;
 
     static class CriticalSectionHandler {
         private static final Set<Entity> lockedEntities = Collections.synchronizedSet(new HashSet<>());
@@ -84,7 +84,9 @@ interface File extends Entity {
 }
 
 interface Folder extends Entity {
-    ErrorCode list();
+    ErrorCode listFiles();
+
+    ErrorCode listFolders();
 
     ErrorCode regexFilter(final String pattern);
 

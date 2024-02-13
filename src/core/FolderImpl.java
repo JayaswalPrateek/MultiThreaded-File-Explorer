@@ -95,9 +95,15 @@ final class FolderImpl implements Folder {
     }
 
     @Override
-    public ErrorCode list() {
+    public ErrorCode listFolders() {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'list'");
+        throw new UnsupportedOperationException("Unimplemented method 'listFolders'");
+    }
+
+    @Override
+    public ErrorCode listFiles() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'listFiles'");
     }
 
     @Override
