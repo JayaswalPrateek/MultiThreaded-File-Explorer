@@ -1,14 +1,14 @@
 package core;
 
-final class FolderImpl implements Folder {
+public final class FolderImpl implements Folder {
     private String name, path;
 
-    FolderImpl(final String name, final String path) {
+    public FolderImpl(final String name, final String path) {
         this.name = name;
         this.path = path;
     }
 
-    FolderImpl(final String name, final String path, final FolderImpl obj) {
+    public FolderImpl(final String name, final String path, final FolderImpl obj) {
         this(name, path);
         // copy contents in obj to this
     }

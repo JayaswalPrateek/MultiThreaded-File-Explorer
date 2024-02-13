@@ -1,14 +1,14 @@
 package core;
 
-final class FileImpl implements File {
+public final class FileImpl implements File {
     private String name, path;
 
-    FileImpl(final String name, final String path) {
+    public FileImpl(final String name, final String path) {
         this.name = name;
         this.path = path;
     }
 
-    FileImpl(final String name, final String path, final FileImpl obj) {
+    public FileImpl(final String name, final String path, final FileImpl obj) {
         this(name, path);
         // copy contents in obj to this
     }
