@@ -1,6 +1,5 @@
 package core;
 
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -76,22 +75,4 @@ interface Entity extends Runnable {
 
     ErrorCode rename(final String newName);
 
-}
-
-interface File extends Entity {
-    ErrorCode open();
-
-    ErrorCode properties();
-}
-
-interface Folder extends Entity {
-    CopyOnWriteArrayList<String> listFiles();
-
-    CopyOnWriteArrayList<String> listFolders();
-
-    ErrorCode regexFilter(final String pattern);
-
-    ErrorCode stepIn(final String target);
-
-    ErrorCode stepOut();
 }
