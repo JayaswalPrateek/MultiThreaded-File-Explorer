@@ -5,7 +5,7 @@ public final class FileImpl implements File {
 
     public FileImpl(final String name, final String path) {
         this.name = name;
-        this.path = path;
+        this.path = path + '/';
     }
 
     public FileImpl(final String name, final String path, final FileImpl obj) {

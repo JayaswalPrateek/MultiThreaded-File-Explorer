@@ -13,7 +13,7 @@ public final class FolderImpl implements Folder {
 
     public FolderImpl(final String name, final String path) {
         this.name = name;
-        this.path = path;
+        this.path = path + '/';
     }
 
     public FolderImpl(final String name, final String path, final FolderImpl obj) {
