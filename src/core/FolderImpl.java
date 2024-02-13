@@ -1,5 +1,11 @@
 package core;
 
+import java.io.IOException;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class FolderImpl implements Folder {
@@ -87,13 +93,30 @@ public final class FolderImpl implements Folder {
     }
 
     public CopyOnWriteArrayList<String> listFolders() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listFolders'");
+        CopyOnWriteArrayList<String> folders = new CopyOnWriteArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name),
+                Files::isDirectory)) {
+            for (Path path : stream) {
+                folders.add(path.toString());
+            }
+        } catch (IOException | DirectoryIteratorException e) {
+            e.printStackTrace();
+        }
+        return folders;
     }
 
     public CopyOnWriteArrayList<String> listFiles() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listFiles'");
+        CopyOnWriteArrayList<String> files = new CopyOnWriteArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name))) {
+            for (Path path : stream) {
+                if (!Files.isDirectory(path)) {
+                    files.add(path.toString());
+                }
+            }
+        } catch (IOException | DirectoryIteratorException e) {
+            e.printStackTrace();
+        }
+        return files;
     }
 
     public ErrorCode regexFilter(final String pattern) {
