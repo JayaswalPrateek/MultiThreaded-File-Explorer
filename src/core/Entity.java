@@ -1,5 +1,6 @@
 package core;
 
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -84,9 +85,9 @@ interface File extends Entity {
 }
 
 interface Folder extends Entity {
-    ErrorCode listFiles();
+    CopyOnWriteArrayList<String> listFiles();
 
-    ErrorCode listFolders();
+    CopyOnWriteArrayList<String> listFolders();
 
     ErrorCode regexFilter(final String pattern);
 

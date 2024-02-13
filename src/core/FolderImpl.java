@@ -1,5 +1,7 @@
 package core;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 public final class FolderImpl implements Folder {
     private String name, path;
 
@@ -95,13 +97,13 @@ public final class FolderImpl implements Folder {
     }
 
     @Override
-    public ErrorCode listFolders() {
+    public CopyOnWriteArrayList<String> listFolders() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'listFolders'");
     }
 
     @Override
-    public ErrorCode listFiles() {
+    public CopyOnWriteArrayList<String> listFiles() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'listFiles'");
     }
