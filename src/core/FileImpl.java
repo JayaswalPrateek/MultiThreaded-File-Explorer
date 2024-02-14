@@ -1,6 +1,10 @@
 package core;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.awt.Desktop;
 
 public final class FileImpl implements File {
@@ -104,7 +108,22 @@ public final class FileImpl implements File {
     }
 
     public ErrorCode properties() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'properties'");
+        Path p = Paths.get(path + name);
+        BasicFileAttributes attrs = null;
+        try {
+            attrs = Files.readAttributes(p, BasicFileAttributes.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Size: " + attrs.size());
+        System.out.println("Creation time: " + attrs.creationTime());
+        System.out.println("Last access time: " + attrs.lastAccessTime());
+        System.out.println("Last modified time: " + attrs.lastModifiedTime());
+        java.io.File file = new java.io.File(path + name);
+        System.out.println("Readable: " + file.canRead());
+        System.out.println("Writable: " + file.canWrite());
+        System.out.println("Executable: " + file.canExecute());
+
+        return ErrorCode.SUCCESS;
     }
 }

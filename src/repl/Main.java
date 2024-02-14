@@ -67,6 +67,7 @@ public class Main {
                     entityDetails obj2 = new entityDetails(fnameWithPath);
                     FileImpl f = new FileImpl(obj2.name, obj2.path);
                     found = true;
+                    f.properties();
                     System.out.println(f.open());
                 }
             if (!found)
