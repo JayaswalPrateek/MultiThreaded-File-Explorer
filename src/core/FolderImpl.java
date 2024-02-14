@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class FolderImpl implements Folder {
     private String name, path;
@@ -119,9 +121,25 @@ public final class FolderImpl implements Folder {
         return files;
     }
 
-    public ErrorCode regexFilter(final String pattern) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'regexFilter'");
+    public CopyOnWriteArrayList<String> regexFilter(final String patternString) {
+        final CopyOnWriteArrayList<String> Files = listFiles();
+        final CopyOnWriteArrayList<String> Folders = listFolders();
+        CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
+        final Pattern pattern = Pattern.compile(patternString);
+
+        for (final String candidateFile : Files) {
+            final Matcher matcher = pattern.matcher(candidateFile);
+            final boolean matchFound = matcher.matches();
+            if (matchFound)
+                Filtered.add(candidateFile);
+        }
+        for (final String candidateFolder : Folders) {
+            final Matcher matcher = pattern.matcher(candidateFolder);
+            final boolean matchFound = matcher.matches();
+            if (matchFound)
+                Filtered.add(candidateFolder);
+        }
+        return Filtered;
     }
 
     public ErrorCode stepIn(final String target) {

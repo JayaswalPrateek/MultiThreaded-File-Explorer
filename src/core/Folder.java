@@ -7,7 +7,7 @@ interface Folder extends Entity {
 
     CopyOnWriteArrayList<String> listFolders();
 
-    ErrorCode regexFilter(final String pattern);
+    CopyOnWriteArrayList<String> regexFilter(final String patternString);
 
     ErrorCode stepIn(final String target);
 
