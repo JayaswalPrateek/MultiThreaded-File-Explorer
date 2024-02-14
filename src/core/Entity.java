@@ -8,12 +8,16 @@ interface Entity extends Runnable {
     static boolean DEBUG = true;
 
     static class CriticalSectionHandler {
-        private static final Set<Entity> lockedEntities = Collections.synchronizedSet(new HashSet<>());
+        private static final Set<Entity> lockedFiles = Collections.synchronizedSet(new HashSet<>());
+        private static final Set<Entity> lockedFolders = Collections.synchronizedSet(new HashSet<>());
 
         private static synchronized boolean lock(final Entity... entities) {
             boolean allLockedSuccessfully = true;
             for (final Entity entity : entities)
-                allLockedSuccessfully = allLockedSuccessfully && lockedEntities.add(entity);
+                if (entity instanceof File)
+                    allLockedSuccessfully = allLockedSuccessfully && lockedFiles.add(entity);
+                else
+                    allLockedSuccessfully = allLockedSuccessfully && lockedFolders.add(entity);
             if (!allLockedSuccessfully && DEBUG)
                 System.out.println("Cannot recover from partial locking");
             if (!allLockedSuccessfully)
@@ -24,7 +28,10 @@ interface Entity extends Runnable {
         private static synchronized boolean unlock(final Entity... entities) {
             boolean allUnlockedSuccessfully = true;
             for (final Entity entity : entities)
-                allUnlockedSuccessfully = allUnlockedSuccessfully && lockedEntities.remove(entity);
+                if (entity instanceof File)
+                    allUnlockedSuccessfully = allUnlockedSuccessfully && lockedFiles.remove(entity);
+                else
+                    allUnlockedSuccessfully = allUnlockedSuccessfully && lockedFolders.remove(entity);
             if (!allUnlockedSuccessfully && DEBUG)
                 System.out.println("Cannot recover from partial unlocking");
             if (!allUnlockedSuccessfully)
@@ -34,7 +41,9 @@ interface Entity extends Runnable {
 
         private static synchronized boolean isLocked(final Entity... entities) {
             for (final Entity entity : entities)
-                if (lockedEntities.contains(entity))
+                if (entity instanceof File && lockedFiles.contains(entity))
+                    return true;
+                else if (entity instanceof Folder && lockedFolders.contains(entity))
                     return true;
             return false;
         }
@@ -42,7 +51,9 @@ interface Entity extends Runnable {
         public static synchronized void getLockedEntities() {
             if (!DEBUG)
                 return;
-            for (final Entity entity : lockedEntities)
+            for (final Entity entity : lockedFiles)
+                System.out.println(entity);
+            for (final Entity entity : lockedFolders)
                 System.out.println(entity);
         }
     }
