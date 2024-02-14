@@ -31,14 +31,6 @@ public final class FolderImpl implements Folder {
         return path;
     }
 
-    private void setName(final String name) {
-        this.name = name;
-    }
-
-    private void setPath(final String path) {
-        this.path = path;
-    }
-
     @Override
     public String toString() {
         return getPath() + getName();
