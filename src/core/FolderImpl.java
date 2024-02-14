@@ -154,8 +154,12 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode stepIn(final String target) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'stepIn'");
+        final CopyOnWriteArrayList<String> Folders = getNameFromPathAndName(listFolders());
+        if (!Folders.contains(target))
+            return ErrorCode.FOLDER_NOT_FOUND;
+        path += name + '/';
+        name = target;
+        return ErrorCode.SUCCESS;
     }
 
     public ErrorCode stepOut() {
