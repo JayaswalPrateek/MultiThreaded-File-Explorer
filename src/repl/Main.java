@@ -12,11 +12,6 @@ public class Main {
         entityDetails(final String pathWithName) {
             name = pathWithName.substring(1 + pathWithName.lastIndexOf('/'));
             path = pathWithName.substring(0, pathWithName.lastIndexOf('/'));
-            if (DEBUG) {
-                System.out.println(DEFAULT_PATH);
-                System.out.println("name is " + name);
-                System.out.println("path is " + path);
-            }
         }
     }
 
@@ -29,6 +24,10 @@ public class Main {
         CopyOnWriteArrayList<String> foldersInDir = workingDirList.listFolders();
         CopyOnWriteArrayList<String> filesInDir = workingDirList.listFiles();
         if (DEBUG) {
+            System.out.println(DEFAULT_PATH);
+            System.out.println("name is " + obj.name);
+            System.out.println("path is " + obj.path);
+
             System.out.println("Folders in " + WORKING_DIR);
             for (final String entity : foldersInDir)
                 System.out.println(entity);
@@ -37,6 +36,15 @@ public class Main {
                 System.out.println(entity);
             for (final String result : workingDirList.regexFilter("bashrc"))
                 System.out.println("Found: " + result);
+
+            System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
+            System.out.println("name is " + workingDirList.getName());
+            System.out.println("path is " + workingDirList.getPath());
+            System.out.println("Stepping out:");
+            System.out.println(workingDirList.stepOut());
+            System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
+            System.out.println("new name is " + workingDirList.getName());
+            System.out.println("new path is " + workingDirList.getPath());
         }
     }
 }
