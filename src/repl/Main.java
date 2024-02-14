@@ -35,6 +35,8 @@ public class Main {
             System.out.println("Files in " + WORKING_DIR);
             for (final String entity : filesInDir)
                 System.out.println(entity);
+            for (final String result : workingDirList.regexFilter("bashrc"))
+                System.out.println("Found: " + result);
         }
     }
 }
