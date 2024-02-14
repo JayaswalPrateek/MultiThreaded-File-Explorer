@@ -107,6 +107,17 @@ public final class FolderImpl implements Folder {
         return folders;
     }
 
+    private CopyOnWriteArrayList<String> getNameFromPathAndName(CopyOnWriteArrayList<String> entityList) {
+        for (int i = 0; i < entityList.size(); i++) {
+            String fullPath = entityList.get(i);
+            String nameOnly = fullPath.substring(fullPath.lastIndexOf('/') + 1);
+            if (nameOnly.startsWith("."))
+                nameOnly = nameOnly.substring(1 + nameOnly.indexOf('.'));
+            entityList.set(i, nameOnly);
+        }
+        return entityList;
+    }
+
     public CopyOnWriteArrayList<String> listFiles() {
         CopyOnWriteArrayList<String> files = new CopyOnWriteArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name))) {
@@ -122,11 +133,11 @@ public final class FolderImpl implements Folder {
     }
 
     public CopyOnWriteArrayList<String> regexFilter(final String patternString) {
-        final CopyOnWriteArrayList<String> Files = listFiles();
-        final CopyOnWriteArrayList<String> Folders = listFolders();
+        final CopyOnWriteArrayList<String> Files = getNameFromPathAndName(listFiles());
+        final CopyOnWriteArrayList<String> Folders = getNameFromPathAndName(listFolders());
+
         CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
         final Pattern pattern = Pattern.compile(patternString);
-
         for (final String candidateFile : Files) {
             final Matcher matcher = pattern.matcher(candidateFile);
             final boolean matchFound = matcher.matches();
