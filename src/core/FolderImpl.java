@@ -171,4 +171,16 @@ public final class FolderImpl implements Folder {
         path = path.substring(0, secondLastIndex + 1);
         return ErrorCode.SUCCESS;
     }
+
+    public ErrorCode cd(final String destination) { // doesnt handle a new absolute path and ~
+        final String[] segments = destination.split("/");
+        for (final String segment : segments)
+            if (segment.equals("."))
+                continue;
+            else if (segment.equals("..") && stepOut() == ErrorCode.FOLDER_NOT_FOUND)
+                return ErrorCode.FOLDER_NOT_FOUND;
+            else if (stepIn(segment) == ErrorCode.FOLDER_NOT_FOUND)
+                return ErrorCode.FOLDER_NOT_FOUND;
+        return ErrorCode.SUCCESS;
+    }
 }

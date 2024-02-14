@@ -51,6 +51,12 @@ public class Main {
             System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
             System.out.println("new name is " + workingDirList.getName());
             System.out.println("new path is " + workingDirList.getPath());
+
+            System.out.println("cding into downloads");
+            System.out.println(workingDirList.cd("./Downloads"));
+            System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
+            System.out.println("new name is " + workingDirList.getName());
+            System.out.println("new path is " + workingDirList.getPath());
         }
     }
 }
