@@ -45,6 +45,12 @@ public class Main {
             System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
             System.out.println("new name is " + workingDirList.getName());
             System.out.println("new path is " + workingDirList.getPath());
+
+            System.out.println("Stepping into prateek");
+            System.out.println(workingDirList.stepIn("prateek"));
+            System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
+            System.out.println("new name is " + workingDirList.getName());
+            System.out.println("new path is " + workingDirList.getPath());
         }
     }
 }
