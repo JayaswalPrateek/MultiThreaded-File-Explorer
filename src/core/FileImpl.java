@@ -1,5 +1,8 @@
 package core;
 
+import java.io.IOException;
+import java.awt.Desktop;
+
 public final class FileImpl implements File {
     private String name, path;
 
@@ -85,8 +88,19 @@ public final class FileImpl implements File {
     }
 
     public ErrorCode open() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'open'");
+        if (!Desktop.isDesktopSupported())
+            return ErrorCode.OPERATION_NOT_SUPPORTED;
+
+        Desktop desktop = Desktop.getDesktop();
+        java.io.File file = new java.io.File(path + name);
+
+        try {
+            desktop.open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return ErrorCode.SUCCESS;
     }
 
     public ErrorCode properties() {

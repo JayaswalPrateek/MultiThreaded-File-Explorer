@@ -57,6 +57,20 @@ public class Main {
             System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
             System.out.println("new name is " + workingDirList.getName());
             System.out.println("new path is " + workingDirList.getPath());
+
+            System.out.print("Enter a file name: ");
+            String fname = "foo.txt";
+            System.out.println(fname);
+            boolean found = false;
+            for (final String fnameWithPath : filesInDir)
+                if (fnameWithPath.endsWith(fname)) {
+                    entityDetails obj2 = new entityDetails(fnameWithPath);
+                    FileImpl f = new FileImpl(obj2.name, obj2.path);
+                    found = true;
+                    System.out.println(f.open());
+                }
+            if (!found)
+                System.out.println(ErrorCode.FILE_NOT_FOUND);
         }
     }
 }
