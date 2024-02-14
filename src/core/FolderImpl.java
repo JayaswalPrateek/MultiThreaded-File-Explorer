@@ -159,7 +159,12 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode stepOut() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'stepOut'");
+        if (path.equals("/"))
+            return ErrorCode.FOLDER_NOT_FOUND;
+        final int lastSlash = path.lastIndexOf('/');
+        final int secondLastIndex = path.lastIndexOf('/', lastSlash - 1);
+        name = path.substring(1 + secondLastIndex, lastSlash);
+        path = path.substring(0, secondLastIndex + 1);
+        return ErrorCode.SUCCESS;
     }
 }
