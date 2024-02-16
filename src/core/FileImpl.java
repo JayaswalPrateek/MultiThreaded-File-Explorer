@@ -42,7 +42,7 @@ public final class FileImpl implements File {
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
         for (final String newFileName : names) {
-            final String fullPath = (destination.equals(".") ? (path + name) : destination) + newFileName;
+            final String fullPath = (destination.equals(".") ? (path + name) : destination) + '/' + newFileName;
             Path pathToFile = Paths.get(fullPath);
             try {
                 Files.createFile(pathToFile);

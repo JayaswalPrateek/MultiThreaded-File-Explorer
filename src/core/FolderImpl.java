@@ -47,7 +47,7 @@ public final class FolderImpl implements Folder {
                     return ErrorCode.ILLEGAL_NAME;
 
         for (final String newFolderName : names) {
-            final String fullPath = (destination.equals(".") ? (path + name) : destination) + newFolderName;
+            final String fullPath = (destination.equals(".") ? (path + name) : destination) + '/' + newFolderName;
             Path pathToFolder = Paths.get(fullPath);
             try {
                 Files.createDirectories(pathToFolder);
