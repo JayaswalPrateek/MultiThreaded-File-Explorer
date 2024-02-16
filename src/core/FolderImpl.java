@@ -36,13 +36,27 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode create(final String... names) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'create'");
+        return create(".", names);
+
     }
 
     public ErrorCode create(final String destination, final String... names) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'create'");
+        for (final String name : names)
+            for (final char ch : name.toCharArray())
+                if (ILLEGAL_CHARACTERS.contains(ch))
+                    return ErrorCode.ILLEGAL_NAME;
+
+        for (final String newFolderName : names) {
+            final String fullPath = (destination.equals(".") ? (path + name) : destination) + newFolderName;
+            Path pathToFolder = Paths.get(fullPath);
+            try {
+                Files.createDirectories(pathToFolder);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return ErrorCode.SUCCESS;
+
     }
 
     public ErrorCode copy(final String destination) {
