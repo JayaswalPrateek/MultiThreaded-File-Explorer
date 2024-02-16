@@ -1,7 +1,9 @@
 package core;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
@@ -74,9 +76,21 @@ interface Entity extends Runnable {
 
     ErrorCode create(final String destination, final String... names);
 
-    ErrorCode delete(final String... names);
+    default ErrorCode delete(final String destination, final String... names) { // for files and empty directories
+        for (final String name : names) {
+            final Path path = Paths.get(name);
+            try {
+                Files.delete(path);
+            } catch (IOException e) {
+                return ErrorCode.OPERATION_NOT_SUPPORTED;
+            }
+        }
+        return ErrorCode.SUCCESS;
+    }
 
-    ErrorCode delete(final String destination, final String... names);
+    default ErrorCode delete(final Entity obj, final String... names) {
+        return delete(obj.getPath(), names);
+    }
 
     ErrorCode copy(final String destination);
 
