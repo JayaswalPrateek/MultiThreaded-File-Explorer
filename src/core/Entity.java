@@ -78,6 +78,8 @@ interface Entity extends Runnable {
 
     ErrorCode move(final String destination, final String... newName);
 
-    ErrorCode rename(final String newName);
+    default ErrorCode rename(final String newName) {
+        return move(".", newName);
+    }
 
 }

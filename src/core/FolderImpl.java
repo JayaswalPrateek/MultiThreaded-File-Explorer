@@ -76,11 +76,6 @@ public final class FolderImpl implements Folder {
         throw new UnsupportedOperationException("Unimplemented method 'move'");
     }
 
-    public ErrorCode rename(final String newName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'rename'");
-    }
-
     public void run() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'run'");
