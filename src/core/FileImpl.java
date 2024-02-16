@@ -19,6 +19,10 @@ public final class FileImpl implements File {
         this(obj.name, obj.path);
     }
 
+    public FileImpl(final String newName, final FolderImpl obj) {
+        this(newName, obj.getPath());
+    }
+
     public String getName() {
         return name;
     }
