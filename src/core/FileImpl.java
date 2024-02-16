@@ -86,16 +86,6 @@ public final class FileImpl implements File {
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
-    public ErrorCode move(final String destination) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'move'");
-    }
-
-    public ErrorCode move(final String destination, final String... newName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'move'");
-    }
-
     public void run() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'run'");

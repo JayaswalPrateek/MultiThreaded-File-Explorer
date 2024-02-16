@@ -1,5 +1,8 @@
 package core;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -79,12 +82,23 @@ interface Entity extends Runnable {
 
     ErrorCode copy(final String destination, final String... newName);
 
-    ErrorCode move(final String destination);
+    default ErrorCode move(final String destination, final Entity obj, final String newName) {
+        try {
+            Path sourcePath = Path.of(obj.getPath() + obj.getName());
+            Path targetPath = Path.of(destination + newName);
+            Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+            return ErrorCode.OPERATION_NOT_SUPPORTED;
+        }
+        return ErrorCode.SUCCESS;
+    }
 
-    ErrorCode move(final String destination, final String... newName);
+    default ErrorCode move(final String destination, final Entity obj) {
+        return move(destination, obj, obj.getName());
+    }
 
-    default ErrorCode rename(final String newName) {
-        return move(".", newName);
+    default ErrorCode rename(final String newName, final Entity obj) {
+        return move(".", obj, newName);
     }
 
 }
