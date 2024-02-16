@@ -24,6 +24,10 @@ public final class FolderImpl implements Folder {
         this(obj.name, obj.path);
     }
 
+    public FolderImpl(final String newName, final FolderImpl obj) {
+        this(newName, obj.getPath() + obj.getName());
+    }
+
     public String getName() {
         return name;
     }
