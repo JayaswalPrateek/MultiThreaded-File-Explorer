@@ -18,7 +18,8 @@ public final class FileImpl implements File {
     }
 
     public FileImpl(final FileImpl obj) {
-        this(obj.name, obj.path);
+        this(obj.name + "-copy", obj.path);
+        copy(".", name);
     }
 
     public FileImpl(final String newName, final FolderImpl obj) {

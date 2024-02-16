@@ -21,7 +21,8 @@ public final class FolderImpl implements Folder {
     }
 
     public FolderImpl(final FolderImpl obj) {
-        this(obj.name, obj.path);
+        this(obj.name + "-copy", obj.path);
+        copy(".", name);
     }
 
     public FolderImpl(final String newName, final FolderImpl obj) {
