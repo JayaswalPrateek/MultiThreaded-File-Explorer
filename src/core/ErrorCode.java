@@ -4,7 +4,8 @@ public enum ErrorCode {
     SUCCESS(0, "Success"),
     FILE_NOT_FOUND(1, "File Not Found"),
     FOLDER_NOT_FOUND(2, "Folder Not Found"),
-    OPERATION_NOT_SUPPORTED(3, "Operation Not Supported");
+    OPERATION_NOT_SUPPORTED(3, "Operation Not Supported"),
+    ILLEGAL_NAME(4, "Name contains Illegal Character");
 
     private final int code;
     private final String message;
