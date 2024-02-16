@@ -72,6 +72,25 @@ public class Main {
                 }
             if (!found)
                 System.out.println(ErrorCode.FILE_NOT_FOUND);
+
+            // 2 ways to create a dir:
+            // 1:
+            String starray1[] = { "DIR_A" };
+            workingDirList.create(".", starray1);
+            String starray2[] = { "DIR_B", "DIR_C" };
+            workingDirList.create(".", starray2);
+            String starray3[] = { "DIR_D" };
+            workingDirList.create(starray3);
+            String starray4[] = { "DIR_E", "DIR_F" };
+            workingDirList.create(starray4);
+            // 2:
+            FolderImpl newFolder = new FolderImpl("newFolder", workingDirList);
+
+            // 2 ways of creating a file:
+            // 1:
+            FileImpl newFile = new FileImpl("test.txt", workingDirList);
+            // 2:
+            newFile.create(new String[] { "a.txt", "b.txt" });
         }
     }
 }
