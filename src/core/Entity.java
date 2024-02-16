@@ -1,11 +1,14 @@
 package core;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 interface Entity extends Runnable {
     static boolean DEBUG = true;
+    Set<Character> ILLEGAL_CHARACTERS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList('/', '\\', ':', '*', '?', '"', '<', '>', '|')));
 
     static class CriticalSectionHandler {
         private static final Set<Entity> lockedFiles = Collections.synchronizedSet(new HashSet<>());
