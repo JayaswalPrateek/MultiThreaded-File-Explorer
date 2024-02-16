@@ -15,9 +15,8 @@ public final class FileImpl implements File {
         this.path = path + '/';
     }
 
-    public FileImpl(final String name, final String path, final FileImpl obj) {
-        this(name, path);
-        // copy contents in obj to this
+    public FileImpl(final FileImpl obj) {
+        this(obj.name, obj.path);
     }
 
     public String getName() {

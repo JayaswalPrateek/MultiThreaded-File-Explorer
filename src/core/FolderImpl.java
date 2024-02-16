@@ -18,9 +18,8 @@ public final class FolderImpl implements Folder {
         this.path = path + '/';
     }
 
-    public FolderImpl(final String name, final String path, final FolderImpl obj) {
-        this(name, path);
-        // copy contents in obj to this
+    public FolderImpl(final FolderImpl obj) {
+        this(obj.name, obj.path);
     }
 
     public String getName() {
