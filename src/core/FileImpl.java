@@ -12,7 +12,9 @@ public final class FileImpl implements File {
 
     public FileImpl(final String name, final String path) {
         this.name = name;
-        this.path = path + '/';
+        this.path = path.endsWith("/") ? path : path + '/';
+        if (!doesExist())
+            create(".", new String[] { name });
     }
 
     public FileImpl(final FileImpl obj) {
@@ -20,7 +22,7 @@ public final class FileImpl implements File {
     }
 
     public FileImpl(final String newName, final FolderImpl obj) {
-        this(newName, obj.getPath());
+        this(newName, obj.getPath() + obj.getName());
     }
 
     public String getName() {
@@ -29,6 +31,11 @@ public final class FileImpl implements File {
 
     public String getPath() {
         return path;
+    }
+
+    public boolean doesExist() {
+        System.out.println(path + name);
+        return Files.exists(Path.of(path, name));
     }
 
     @Override

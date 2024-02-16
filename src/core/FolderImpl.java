@@ -15,7 +15,9 @@ public final class FolderImpl implements Folder {
 
     public FolderImpl(final String name, final String path) {
         this.name = name;
-        this.path = path + '/';
+        this.path = path.endsWith("/") ? path : path + '/';
+        if (!doesExist())
+            create(".", new String[] { name });
     }
 
     public FolderImpl(final FolderImpl obj) {
@@ -28,6 +30,10 @@ public final class FolderImpl implements Folder {
 
     public String getPath() {
         return path;
+    }
+
+    public boolean doesExist() {
+        return Files.exists(Path.of(path, name)) && Files.isDirectory(Path.of(path, name));
     }
 
     @Override
