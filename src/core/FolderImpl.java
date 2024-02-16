@@ -3,9 +3,13 @@ package core;
 import java.io.IOException;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,14 +74,34 @@ public final class FolderImpl implements Folder {
 
     }
 
-    public ErrorCode copy(final String destination) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'copy'");
+    public ErrorCode copy(final String destination, final String newName) {
+        Path sourcePath = Paths.get(path + name);
+        Path targetPath = Paths.get(destination + newName);
+        try {
+            Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    Path targetDirPath = targetPath.resolve(sourcePath.relativize(dir));
+                    if (!Files.exists(targetDirPath))
+                        Files.createDirectories(targetDirPath);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.copy(file, targetPath.resolve(sourcePath.relativize(file)),
+                            StandardCopyOption.REPLACE_EXISTING);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ErrorCode.SUCCESS;
     }
 
-    public ErrorCode copy(final String destination, final String newName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'copy'");
+    public ErrorCode copy(final String destination) {
+        return copy(destination, name);
     }
 
     public ErrorCode delete(final String... names) {

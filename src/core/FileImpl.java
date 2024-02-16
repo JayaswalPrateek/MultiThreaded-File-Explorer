@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.awt.Desktop;
 
@@ -66,14 +67,19 @@ public final class FileImpl implements File {
         return ErrorCode.SUCCESS;
     }
 
-    public ErrorCode copy(final String destination) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'copy'");
+    public ErrorCode copy(final String destination, final String newName) {
+        Path sourcePath = Paths.get(path + name);
+        Path targetPath = Paths.get(destination + newName);
+        try {
+            Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ErrorCode.SUCCESS;
     }
 
-    public ErrorCode copy(final String destination, final String newName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'copy'");
+    public ErrorCode copy(final String destination) {
+        return copy(destination, name);
     }
 
     public ErrorCode delete(final String... names) {
