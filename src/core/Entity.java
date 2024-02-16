@@ -80,7 +80,7 @@ interface Entity extends Runnable {
 
     ErrorCode copy(final String destination);
 
-    ErrorCode copy(final String destination, final String... newName);
+    ErrorCode copy(final String destination, final String newName);
 
     default ErrorCode move(final String destination, final Entity obj, final String newName) {
         try {

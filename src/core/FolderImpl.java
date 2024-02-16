@@ -75,7 +75,7 @@ public final class FolderImpl implements Folder {
         throw new UnsupportedOperationException("Unimplemented method 'copy'");
     }
 
-    public ErrorCode copy(final String destination, final String... newName) {
+    public ErrorCode copy(final String destination, final String newName) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'copy'");
     }
