@@ -9,30 +9,30 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.awt.Desktop;
 
 public final class FileImpl implements File {
-    private String name, path;
+    private volatile String path, name;
 
-    public FileImpl(final String name, final String path) {
-        this.name = name;
+    public FileImpl(final String path, final String name) {
         this.path = path.endsWith("/") ? path : path + '/';
+        this.name = name;
         if (!doesExist())
             create(".", new String[] { name });
     }
 
     public FileImpl(final FileImpl obj) {
-        this(obj.name + "-copy", obj.path);
+        this(obj.path, obj.name + "-copy");
         copy(".", name);
     }
 
     public FileImpl(final String newName, final FolderImpl obj) {
-        this(newName, obj.getPath() + obj.getName());
-    }
-
-    public String getName() {
-        return name;
+        this(obj.getPath() + obj.getName(), newName);
     }
 
     public String getPath() {
         return path;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public boolean doesExist() {
@@ -44,10 +44,6 @@ public final class FileImpl implements File {
         return getPath() + getName();
     }
 
-    public ErrorCode create(final String... names) {
-        return create(".", names);
-    }
-
     public ErrorCode create(final String destination, final String... names) {
         for (final String name : names)
             for (final char ch : name.toCharArray())
@@ -55,7 +51,6 @@ public final class FileImpl implements File {
                     return ErrorCode.ILLEGAL_NAME;
         for (final String newFileName : names) {
             final String fullPath = (destination.equals(".") ? path : destination) + newFileName;
-            System.out.println("creating " + fullPath);
             Path pathToFile = Paths.get(fullPath);
             try {
                 Files.createFile(pathToFile);
@@ -64,6 +59,10 @@ public final class FileImpl implements File {
             }
         }
         return ErrorCode.SUCCESS;
+    }
+
+    public ErrorCode create(final String... names) {
+        return create(".", names);
     }
 
     public ErrorCode copy(final String destination, final String newName) {
@@ -90,20 +89,19 @@ public final class FileImpl implements File {
         if (!Desktop.isDesktopSupported())
             return ErrorCode.OPERATION_NOT_SUPPORTED;
 
-        Desktop desktop = Desktop.getDesktop();
-        java.io.File file = new java.io.File(path + name);
+        final Desktop desktop = Desktop.getDesktop();
+        final java.io.File file = new java.io.File(path + name);
 
         try {
             desktop.open(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return ErrorCode.SUCCESS;
     }
 
     public ErrorCode properties() {
-        Path p = Paths.get(path + name);
+        final Path p = Paths.get(path + name);
         BasicFileAttributes attrs = null;
         try {
             attrs = Files.readAttributes(p, BasicFileAttributes.class);
@@ -114,11 +112,10 @@ public final class FileImpl implements File {
         System.out.println("Creation time: " + attrs.creationTime());
         System.out.println("Last access time: " + attrs.lastAccessTime());
         System.out.println("Last modified time: " + attrs.lastModifiedTime());
-        java.io.File file = new java.io.File(path + name);
+        final java.io.File file = new java.io.File(path + name);
         System.out.println("Readable: " + file.canRead());
         System.out.println("Writable: " + file.canWrite());
         System.out.println("Executable: " + file.canExecute());
-
         return ErrorCode.SUCCESS;
     }
 }

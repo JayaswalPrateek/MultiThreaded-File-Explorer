@@ -15,30 +15,30 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class FolderImpl implements Folder {
-    private String name, path;
+    private volatile String path, name;
 
-    public FolderImpl(final String name, final String path) {
-        this.name = name;
+    public FolderImpl(final String path, final String name) {
         this.path = path.endsWith("/") ? path : path + '/';
+        this.name = name;
         if (!doesExist())
             create(".", new String[] { name });
     }
 
     public FolderImpl(final FolderImpl obj) {
-        this(obj.name + "-copy", obj.path);
+        this(obj.path, obj.name + "-copy");
         copy(".", name);
     }
 
     public FolderImpl(final String newName, final FolderImpl obj) {
-        this(newName, obj.getPath() + obj.getName());
-    }
-
-    public String getName() {
-        return name;
+        this(obj.getPath() + obj.getName(), newName);
     }
 
     public String getPath() {
         return path;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public boolean doesExist() {
@@ -50,19 +50,13 @@ public final class FolderImpl implements Folder {
         return getPath() + getName();
     }
 
-    public ErrorCode create(final String... names) {
-        return create(".", names);
-
-    }
-
     public ErrorCode create(final String destination, final String... names) {
         for (final String name : names)
             for (final char ch : name.toCharArray())
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
-
         for (final String newFolderName : names) {
-            final String fullPath = (destination.equals(".") ? (path + name) : destination) + '/' + newFolderName;
+            final String fullPath = (destination.equals(".") ? (path + name + '/') : destination) + newFolderName;
             Path pathToFolder = Paths.get(fullPath);
             try {
                 Files.createDirectories(pathToFolder);
@@ -71,24 +65,28 @@ public final class FolderImpl implements Folder {
             }
         }
         return ErrorCode.SUCCESS;
+    }
 
+    public ErrorCode create(final String... names) {
+        return create(".", names);
     }
 
     public ErrorCode copy(final String destination, final String newName) {
-        Path sourcePath = Paths.get(path + name);
-        Path targetPath = Paths.get(destination + newName);
+        final Path sourcePath = Paths.get(path + name);
+        final Path targetPath = Paths.get(destination + newName);
         try {
             Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
                 @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    Path targetDirPath = targetPath.resolve(sourcePath.relativize(dir));
+                public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
+                        throws IOException {
+                    final Path targetDirPath = targetPath.resolve(sourcePath.relativize(dir));
                     if (!Files.exists(targetDirPath))
                         Files.createDirectories(targetDirPath);
                     return FileVisitResult.CONTINUE;
                 }
 
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
                     Files.copy(file, targetPath.resolve(sourcePath.relativize(file)),
                             StandardCopyOption.REPLACE_EXISTING);
                     return FileVisitResult.CONTINUE;
@@ -109,22 +107,33 @@ public final class FolderImpl implements Folder {
         throw new UnsupportedOperationException("Unimplemented method 'run'");
     }
 
+    public CopyOnWriteArrayList<String> listFiles() {
+        final CopyOnWriteArrayList<String> files = new CopyOnWriteArrayList<>();
+        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name))) {
+            for (final Path path : stream)
+                if (!Files.isDirectory(path))
+                    files.add(path.toString());
+        } catch (IOException | DirectoryIteratorException e) {
+            e.printStackTrace();
+        }
+        return files;
+    }
+
     public CopyOnWriteArrayList<String> listFolders() {
-        CopyOnWriteArrayList<String> folders = new CopyOnWriteArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name),
+        final CopyOnWriteArrayList<String> folders = new CopyOnWriteArrayList<>();
+        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name),
                 Files::isDirectory)) {
-            for (Path path : stream) {
+            for (final Path path : stream)
                 folders.add(path.toString());
-            }
         } catch (IOException | DirectoryIteratorException e) {
             e.printStackTrace();
         }
         return folders;
     }
 
-    private CopyOnWriteArrayList<String> getNameFromPathAndName(CopyOnWriteArrayList<String> entityList) {
+    private CopyOnWriteArrayList<String> getNameFromPathAndName(final CopyOnWriteArrayList<String> entityList) {
         for (int i = 0; i < entityList.size(); i++) {
-            String fullPath = entityList.get(i);
+            final String fullPath = entityList.get(i);
             String nameOnly = fullPath.substring(fullPath.lastIndexOf('/') + 1);
             if (nameOnly.startsWith("."))
                 nameOnly = nameOnly.substring(1 + nameOnly.indexOf('.'));
@@ -133,25 +142,11 @@ public final class FolderImpl implements Folder {
         return entityList;
     }
 
-    public CopyOnWriteArrayList<String> listFiles() {
-        CopyOnWriteArrayList<String> files = new CopyOnWriteArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name))) {
-            for (Path path : stream) {
-                if (!Files.isDirectory(path)) {
-                    files.add(path.toString());
-                }
-            }
-        } catch (IOException | DirectoryIteratorException e) {
-            e.printStackTrace();
-        }
-        return files;
-    }
-
     public CopyOnWriteArrayList<String> regexFilter(final String patternString) {
         final CopyOnWriteArrayList<String> Files = getNameFromPathAndName(listFiles());
         final CopyOnWriteArrayList<String> Folders = getNameFromPathAndName(listFolders());
 
-        CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
+        final CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
         final Pattern pattern = Pattern.compile(patternString);
         for (final String candidateFile : Files) {
             final Matcher matcher = pattern.matcher(candidateFile);
