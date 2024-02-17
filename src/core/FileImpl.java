@@ -36,6 +36,8 @@ public final class FileImpl implements File {
     }
 
     public boolean doesExist() {
+        if (DEBUG)
+            System.out.println("Checking if " + path + name + " exists");
         return Files.exists(Path.of(path, name));
     }
 
@@ -50,6 +52,8 @@ public final class FileImpl implements File {
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
         for (final String newFileName : names) {
+            if (DEBUG)
+                System.out.println("Creating " + destination + newFileName);
             final String fullPath = (destination.equals(".") ? path : destination) + newFileName;
             Path pathToFile = Paths.get(fullPath);
             try {
@@ -66,6 +70,8 @@ public final class FileImpl implements File {
     }
 
     public ErrorCode copy(final String destination, final String newName) {
+        if (DEBUG)
+            System.out.println("Copying " + path + name + " to " + destination + newName);
         Path sourcePath = Paths.get(path + name);
         Path targetPath = Paths.get(destination + newName);
         try {
@@ -86,12 +92,12 @@ public final class FileImpl implements File {
     }
 
     public ErrorCode open() {
+        if (DEBUG)
+            System.out.println("Opening " + path + name);
         if (!Desktop.isDesktopSupported())
             return ErrorCode.OPERATION_NOT_SUPPORTED;
-
         final Desktop desktop = Desktop.getDesktop();
         final java.io.File file = new java.io.File(path + name);
-
         try {
             desktop.open(file);
         } catch (IOException e) {
@@ -101,6 +107,8 @@ public final class FileImpl implements File {
     }
 
     public ErrorCode properties() {
+        if (DEBUG)
+            System.out.println("Properties of " + path + name);
         final Path p = Paths.get(path + name);
         BasicFileAttributes attrs = null;
         try {

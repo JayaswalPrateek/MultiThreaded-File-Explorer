@@ -42,6 +42,8 @@ public final class FolderImpl implements Folder {
     }
 
     public boolean doesExist() {
+        if (DEBUG)
+            System.out.println("Checking if " + path + name + " exists");
         return Files.exists(Path.of(path, name)) && Files.isDirectory(Path.of(path, name));
     }
 
@@ -56,6 +58,8 @@ public final class FolderImpl implements Folder {
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
         for (final String newFolderName : names) {
+            if (DEBUG)
+                System.out.println("Creating " + destination + newFolderName);
             final String fullPath = (destination.equals(".") ? (path + name + '/') : destination) + newFolderName;
             Path pathToFolder = Paths.get(fullPath);
             try {
@@ -72,6 +76,8 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode copy(final String destination, final String newName) {
+        if (DEBUG)
+            System.out.println("Copying " + path + name + " to " + destination + newName);
         final Path sourcePath = Paths.get(path + name);
         final Path targetPath = Paths.get(destination + newName);
         try {
@@ -138,6 +144,8 @@ public final class FolderImpl implements Folder {
             if (nameOnly.startsWith("."))
                 nameOnly = nameOnly.substring(1 + nameOnly.indexOf('.'));
             entityList.set(i, nameOnly);
+            if (DEBUG)
+                System.out.println("Name of Entity in " + fullPath + " is " + nameOnly);
         }
         return entityList;
     }
@@ -164,6 +172,8 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode stepIn(final String target) {
+        if (DEBUG)
+            System.out.println("Stepping in from path=" + path + " name=" + name + " to " + target);
         final CopyOnWriteArrayList<String> Folders = getNameFromPathAndName(listFolders());
         if (!Folders.contains(target))
             return ErrorCode.FOLDER_NOT_FOUND;
@@ -173,6 +183,8 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode stepOut() {
+        if (DEBUG)
+            System.out.println("Stepping out path=" + path + " name=" + name);
         if (path.equals("/"))
             return ErrorCode.FOLDER_NOT_FOUND;
         final int lastSlash = path.lastIndexOf('/');
@@ -183,6 +195,8 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode cd(final String destination) { // doesnt handle a new absolute path and ~
+        if (DEBUG)
+            System.out.println("cding into " + destination);
         final String[] segments = destination.split("/");
         for (final String segment : segments)
             if (segment.equals("."))

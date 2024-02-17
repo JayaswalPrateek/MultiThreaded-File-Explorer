@@ -26,8 +26,12 @@ interface Entity extends Runnable {
                     allLockedSuccessfully = allLockedSuccessfully && lockedFiles.add(entity);
                 else
                     allLockedSuccessfully = allLockedSuccessfully && lockedFolders.add(entity);
-            if (!allLockedSuccessfully && DEBUG)
-                System.out.println("Cannot recover from partial locking");
+            if (DEBUG)
+                if (allLockedSuccessfully)
+                    for (final Entity entity : entities)
+                        System.out.println("Successfully locked: " + entity);
+                else
+                    System.out.println("Cannot recover from partial locking");
             if (!allLockedSuccessfully)
                 System.exit(1);
             return allLockedSuccessfully;
@@ -40,8 +44,12 @@ interface Entity extends Runnable {
                     allUnlockedSuccessfully = allUnlockedSuccessfully && lockedFiles.remove(entity);
                 else
                     allUnlockedSuccessfully = allUnlockedSuccessfully && lockedFolders.remove(entity);
-            if (!allUnlockedSuccessfully && DEBUG)
-                System.out.println("Cannot recover from partial unlocking");
+            if (DEBUG)
+                if (allUnlockedSuccessfully)
+                    for (final Entity entity : entities)
+                        System.out.println("Successfully unlocked: " + entity);
+                else
+                    System.out.println("Cannot recover from partial unlocking");
             if (!allUnlockedSuccessfully)
                 System.exit(1);
             return allUnlockedSuccessfully;
@@ -53,6 +61,9 @@ interface Entity extends Runnable {
                     return true;
                 else if (entity instanceof Folder && lockedFolders.contains(entity))
                     return true;
+            if (DEBUG)
+                for (final Entity entity : entities)
+                    System.out.println(entity + " not locked");
             return false;
         }
 
@@ -78,6 +89,8 @@ interface Entity extends Runnable {
 
     default ErrorCode delete(final String destination, final String... names) { // for files and empty directories
         for (final String name : names) {
+            if (DEBUG)
+                System.out.println("Deleting " + destination + name);
             try {
                 Files.delete(Paths.get(name));
             } catch (IOException e) {
@@ -96,6 +109,8 @@ interface Entity extends Runnable {
     ErrorCode copy(final String destination);
 
     default ErrorCode move(final String destination, final Entity obj, final String newName) {
+        if (DEBUG)
+            System.out.println("Moving " + obj.getPath() + obj.getName() + " to " + destination + newName);
         try {
             Path sourcePath = Path.of(obj.getPath() + obj.getName());
             Path targetPath = Path.of((destination == "." ? obj.getPath() : destination) + newName);
@@ -111,6 +126,8 @@ interface Entity extends Runnable {
     }
 
     default ErrorCode rename(final String newName, final Entity obj) {
+        if (DEBUG)
+            System.out.print("(Renaming)");
         return move(".", obj, newName);
     }
 }
