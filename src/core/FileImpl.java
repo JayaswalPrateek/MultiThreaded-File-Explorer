@@ -36,7 +36,6 @@ public final class FileImpl implements File {
     }
 
     public boolean doesExist() {
-        System.out.println(path + name);
         return Files.exists(Path.of(path, name));
     }
 
