@@ -3,94 +3,95 @@ package repl; // Read-Evaluate-Print Loop
 import java.util.concurrent.CopyOnWriteArrayList;
 import core.*;
 
-public class Main {
-    private static boolean DEBUG = true;
+final class Main {
+    private static final boolean DEBUG = true;
 
-    static class entityDetails {
-        String name, path;
+    private static final class Splitter {
+        private final String path, name;
 
-        entityDetails(final String pathWithName) {
+        Splitter(final String pathWithName) {
+            path = pathWithName.substring(0, 1 + pathWithName.lastIndexOf('/'));
             name = pathWithName.substring(1 + pathWithName.lastIndexOf('/'));
-            path = pathWithName.substring(0, pathWithName.lastIndexOf('/'));
+            if (DEBUG)
+                System.out.println("Splitting " + pathWithName + " into " + path + " and " + name);
         }
     }
 
-    static final String DEFAULT_PATH = System.getProperty("user.home");
-    static String WORKING_DIR = DEFAULT_PATH;
-
     public static void main(final String[] args) {
-        entityDetails obj = new entityDetails(WORKING_DIR);
-        FolderImpl workingDirList = new FolderImpl(obj.name, obj.path);
-        CopyOnWriteArrayList<String> foldersInDir = workingDirList.listFolders();
-        CopyOnWriteArrayList<String> filesInDir = workingDirList.listFiles();
+        Splitter s = new Splitter(System.getProperty("user.home"));
+        FolderImpl workingDir = new FolderImpl(s.name, s.path);
+        CopyOnWriteArrayList<String> directoryList = workingDir.listFolders();
+        CopyOnWriteArrayList<String> fileList = workingDir.listFiles();
+
         if (DEBUG) {
-            System.out.println(DEFAULT_PATH);
-            System.out.println("name is " + obj.name);
-            System.out.println("path is " + obj.path);
+            // System.out.println(System.getProperty("user.home"));
+            // System.out.println("name is " + s.name);
+            // System.out.println("path is " + s.path);
 
-            System.out.println("Folders in " + WORKING_DIR);
-            for (final String entity : foldersInDir)
-                System.out.println(entity);
-            System.out.println("Files in " + WORKING_DIR);
-            for (final String entity : filesInDir)
-                System.out.println(entity);
-            for (final String result : workingDirList.regexFilter("bashrc"))
-                System.out.println("Found: " + result);
+            // System.out.println("Folders in " + System.getProperty("user.home"));
+            // for (final String entity : directoryList)
+            // System.out.println(entity);
+            // System.out.println("Files in " + System.getProperty("user.home"));
+            // for (final String entity : fileList)
+            // System.out.println(entity);
+            // for (final String result : workingDir.regexFilter("bashrc"))
+            // System.out.println("Found: " + result);
 
-            System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
-            System.out.println("name is " + workingDirList.getName());
-            System.out.println("path is " + workingDirList.getPath());
-            System.out.println("Stepping out:");
-            System.out.println(workingDirList.stepOut());
-            System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
-            System.out.println("new name is " + workingDirList.getName());
-            System.out.println("new path is " + workingDirList.getPath());
+            // System.out.println("now in " + workingDir.getPath() + workingDir.getName());
+            // System.out.println("name is " + workingDir.getName());
+            // System.out.println("path is " + workingDir.getPath());
+            // System.out.println("Stepping out:");
+            // System.out.println(workingDir.stepOut());
+            // System.out.println("now in " + workingDir.getPath() + workingDir.getName());
+            // System.out.println("new name is " + workingDir.getName());
+            // System.out.println("new path is " + workingDir.getPath());
 
-            System.out.println("Stepping into prateek");
-            System.out.println(workingDirList.stepIn("prateek"));
-            System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
-            System.out.println("new name is " + workingDirList.getName());
-            System.out.println("new path is " + workingDirList.getPath());
+            // System.out.println("Stepping into prateek");
+            // System.out.println(workingDir.stepIn("prateek"));
+            // System.out.println("now in " + workingDir.getPath() + workingDir.getName());
+            // System.out.println("new name is " + workingDir.getName());
+            // System.out.println("new path is " + workingDir.getPath());
 
-            System.out.println("cding into downloads");
-            System.out.println(workingDirList.cd("./Downloads"));
-            System.out.println("now in " + workingDirList.getPath() + workingDirList.getName());
-            System.out.println("new name is " + workingDirList.getName());
-            System.out.println("new path is " + workingDirList.getPath());
+            // System.out.println("cding into downloads");
+            // System.out.println(workingDir.cd("./Downloads"));
+            // System.out.println("now in " + workingDir.getPath() + workingDir.getName());
+            // System.out.println("new name is " + workingDir.getName());
+            // System.out.println("new path is " + workingDir.getPath());
 
-            System.out.print("Enter a file name: ");
-            String fname = "foo.txt";
-            System.out.println(fname);
-            boolean found = false;
-            for (final String fnameWithPath : filesInDir)
-                if (fnameWithPath.endsWith(fname)) {
-                    entityDetails obj2 = new entityDetails(fnameWithPath);
-                    FileImpl f = new FileImpl(obj2.name, obj2.path);
-                    found = true;
-                    f.properties();
-                    System.out.println(f.open());
-                }
-            if (!found)
-                System.out.println(ErrorCode.FILE_NOT_FOUND);
+            // System.out.print("Enter a file name: ");
+            // String fname = "foo.txt";
+            // System.out.println(fname);
 
-            // 2 ways to create a dir:
-            // 1:
-            String starray1[] = { "DIR_A" };
-            workingDirList.create(".", starray1);
-            String starray2[] = { "DIR_B", "DIR_C" };
-            workingDirList.create(".", starray2);
-            String starray3[] = { "DIR_D" };
-            workingDirList.create(starray3);
-            String starray4[] = { "DIR_E", "DIR_F" };
-            workingDirList.create(starray4);
-            // 2:
-            FolderImpl newFolder = new FolderImpl("newFolder", workingDirList);
+            // boolean found = false;
+            // for (final String fnameWithPath : fileList)
+            // if (fnameWithPath.endsWith('/' + fname)) {
+            // s = new Splitter(fnameWithPath);
+            // FileImpl f = new FileImpl(s.name, s.path);
+            // found = true;
+            // f.properties();
+            // System.out.println(f.open());
+            // }
+            // if (!found)
+            // System.out.println(ErrorCode.FILE_NOT_FOUND);
 
-            // 2 ways of creating a file:
-            // 1:
-            FileImpl newFile = new FileImpl("test.txt", workingDirList);
-            // 2:
-            newFile.create(new String[] { "a.txt", "b.txt" });
+            // // 2 ways to create a dir:
+            // // 1:
+            // String starray1[] = { "DIR_A" };
+            // workingDir.create(".", starray1);
+            // String starray2[] = { "DIR_B", "DIR_C" };
+            // workingDir.create(".", starray2);
+            // String starray3[] = { "DIR_D" };
+            // workingDir.create(starray3);
+            // String starray4[] = { "DIR_E", "DIR_F" };
+            // workingDir.create(starray4);
+            // // 2:
+            // FolderImpl newFolder = new FolderImpl("newFolder", workingDir);
+
+            // // 2 ways of creating a file:
+            // // 1:
+            // FileImpl newFile = new FileImpl("test.txt", workingDir);
+            // // 2:
+            // newFile.create(new String[] { "a.txt", "b.txt" });
         }
     }
 }
