@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 interface Entity extends Runnable {
-    static boolean DEBUG = true;
-    Set<Character> ILLEGAL_CHARACTERS = Collections
+    static final boolean DEBUG = true;
+    static final Set<Character> ILLEGAL_CHARACTERS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList('/', '\\', ':', '*', '?', '"', '<', '>', '|')));
 
     static class CriticalSectionHandler {
@@ -66,21 +66,20 @@ interface Entity extends Runnable {
         }
     }
 
-    String getName();
-
     String getPath();
+
+    String getName();
 
     boolean doesExist();
 
-    ErrorCode create(final String... names);
-
     ErrorCode create(final String destination, final String... names);
+
+    ErrorCode create(final String... names);
 
     default ErrorCode delete(final String destination, final String... names) { // for files and empty directories
         for (final String name : names) {
-            final Path path = Paths.get(name);
             try {
-                Files.delete(path);
+                Files.delete(Paths.get(name));
             } catch (IOException e) {
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
             }
@@ -92,14 +91,14 @@ interface Entity extends Runnable {
         return delete(obj.getPath(), names);
     }
 
-    ErrorCode copy(final String destination);
-
     ErrorCode copy(final String destination, final String newName);
+
+    ErrorCode copy(final String destination);
 
     default ErrorCode move(final String destination, final Entity obj, final String newName) {
         try {
             Path sourcePath = Path.of(obj.getPath() + obj.getName());
-            Path targetPath = Path.of(destination + newName);
+            Path targetPath = Path.of((destination == "." ? obj.getPath() : destination) + newName);
             Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
@@ -114,5 +113,4 @@ interface Entity extends Runnable {
     default ErrorCode rename(final String newName, final Entity obj) {
         return move(".", obj, newName);
     }
-
 }
