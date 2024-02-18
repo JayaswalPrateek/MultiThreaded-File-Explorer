@@ -15,11 +15,11 @@ interface Entity extends Runnable {
     static final Set<Character> ILLEGAL_CHARACTERS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList('/', '\\', ':', '*', '?', '"', '<', '>', '|')));
 
-    static class CriticalSectionHandler {
-        private static final Set<Entity> lockedFiles = Collections.synchronizedSet(new HashSet<>());
-        private static final Set<Entity> lockedFolders = Collections.synchronizedSet(new HashSet<>());
+    final static class CriticalSectionHandler {
+        private static volatile Set<Entity> lockedFiles = Collections.synchronizedSet(new HashSet<>());
+        private static volatile Set<Entity> lockedFolders = Collections.synchronizedSet(new HashSet<>());
 
-        private static synchronized boolean lock(final Entity... entities) {
+        private static synchronized void lock(final Entity... entities) {
             boolean allLockedSuccessfully = true;
             for (final Entity entity : entities)
                 if (entity instanceof File)
@@ -29,15 +29,14 @@ interface Entity extends Runnable {
             if (DEBUG)
                 if (allLockedSuccessfully)
                     for (final Entity entity : entities)
-                        System.out.println("Successfully locked: " + entity);
+                        System.out.println("LOCKED " + entity);
                 else
-                    System.out.println("Cannot recover from partial locking");
+                    System.out.println("FATAL: CANNOT RECOVER FROM PARTIAL LOCKING");
             if (!allLockedSuccessfully)
                 System.exit(1);
-            return allLockedSuccessfully;
         }
 
-        private static synchronized boolean unlock(final Entity... entities) {
+        private static synchronized void unlock(final Entity... entities) {
             boolean allUnlockedSuccessfully = true;
             for (final Entity entity : entities)
                 if (entity instanceof File)
@@ -47,33 +46,26 @@ interface Entity extends Runnable {
             if (DEBUG)
                 if (allUnlockedSuccessfully)
                     for (final Entity entity : entities)
-                        System.out.println("Successfully unlocked: " + entity);
+                        System.out.println("UNLOCKED " + entity);
                 else
-                    System.out.println("Cannot recover from partial unlocking");
+                    System.out.println("FATAL: CANNOT RECOVER FROM PARTIAL UNLOCKING");
             if (!allUnlockedSuccessfully)
                 System.exit(1);
-            return allUnlockedSuccessfully;
         }
 
         private static synchronized boolean isLocked(final Entity... entities) {
+            boolean lockedFlag = true;
             for (final Entity entity : entities)
-                if (entity instanceof File && lockedFiles.contains(entity))
-                    return true;
-                else if (entity instanceof Folder && lockedFolders.contains(entity))
-                    return true;
-            if (DEBUG)
-                for (final Entity entity : entities)
-                    System.out.println(entity + " not locked");
-            return false;
-        }
-
-        public static synchronized void getLockedEntities() {
-            if (!DEBUG)
-                return;
-            for (final Entity entity : lockedFiles)
-                System.out.println(entity);
-            for (final Entity entity : lockedFolders)
-                System.out.println(entity);
+                if (!((entity instanceof File && lockedFiles.contains(entity))
+                        || (entity instanceof Folder && lockedFolders.contains(entity)))) {
+                    lockedFlag = false;
+                    if (DEBUG)
+                        System.out.println(entity + " NOT LOCKED");
+                    break;
+                }
+            if (DEBUG && lockedFlag)
+                System.out.println("ALL ENTITIES LOCKED");
+            return lockedFlag;
         }
     }
 
@@ -90,7 +82,7 @@ interface Entity extends Runnable {
     default ErrorCode delete(final String destination, final String... names) { // for files and empty directories
         for (final String name : names) {
             if (DEBUG)
-                System.out.println("Deleting " + destination + name);
+                System.out.println("DELETING " + destination + name);
             try {
                 Files.delete(Paths.get(name));
             } catch (IOException e) {
@@ -110,10 +102,11 @@ interface Entity extends Runnable {
 
     default ErrorCode move(final String destination, final Entity obj, final String newName) {
         if (DEBUG)
-            System.out.println("Moving " + obj.getPath() + obj.getName() + " to " + destination + newName);
+            System.out.println("MOVING " + obj.getPath() + obj.getName() + " to " + (destination == "." ? obj.getPath()
+                    : destination) + newName);
         try {
-            Path sourcePath = Path.of(obj.getPath() + obj.getName());
-            Path targetPath = Path.of((destination == "." ? obj.getPath() : destination) + newName);
+            final Path sourcePath = Path.of(obj.getPath() + obj.getName());
+            final Path targetPath = Path.of((destination == "." ? obj.getPath() : destination) + newName);
             Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
@@ -127,7 +120,7 @@ interface Entity extends Runnable {
 
     default ErrorCode rename(final String newName, final Entity obj) {
         if (DEBUG)
-            System.out.print("(Renaming)");
+            System.out.print("RENAMING BY ");
         return move(".", obj, newName);
     }
 }

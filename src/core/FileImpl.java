@@ -12,7 +12,7 @@ public final class FileImpl implements File {
     private volatile String path, name;
 
     public FileImpl(final String path, final String name) {
-        this.path = path.endsWith("/") ? path : path + '/';
+        this.path = path.endsWith("/") ? path : (path + '/');
         this.name = name;
         if (!doesExist())
             create(".", new String[] { name });
@@ -37,7 +37,7 @@ public final class FileImpl implements File {
 
     public boolean doesExist() {
         if (DEBUG)
-            System.out.println("Checking if " + path + name + " exists");
+            System.out.println("CHECKING IF " + path + name + " EXISTS");
         return Files.exists(Path.of(path, name));
     }
 
@@ -53,9 +53,9 @@ public final class FileImpl implements File {
                     return ErrorCode.ILLEGAL_NAME;
         for (final String newFileName : names) {
             if (DEBUG)
-                System.out.println("Creating " + destination + newFileName);
+                System.out.println("CREATING " + (destination.equals(".") ? path : destination) + newFileName);
             final String fullPath = (destination.equals(".") ? path : destination) + newFileName;
-            Path pathToFile = Paths.get(fullPath);
+            final Path pathToFile = Paths.get(fullPath);
             try {
                 Files.createFile(pathToFile);
             } catch (IOException e) {
@@ -71,9 +71,9 @@ public final class FileImpl implements File {
 
     public ErrorCode copy(final String destination, final String newName) {
         if (DEBUG)
-            System.out.println("Copying " + path + name + " to " + destination + newName);
-        Path sourcePath = Paths.get(path + name);
-        Path targetPath = Paths.get(destination + newName);
+            System.out.println("COPYING " + path + name + " TO " + destination + newName);
+        final Path sourcePath = Paths.get(path + name);
+        final Path targetPath = Paths.get(destination + newName);
         try {
             Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -93,7 +93,7 @@ public final class FileImpl implements File {
 
     public ErrorCode open() {
         if (DEBUG)
-            System.out.println("Opening " + path + name);
+            System.out.println("OPENING " + path + name);
         if (!Desktop.isDesktopSupported())
             return ErrorCode.OPERATION_NOT_SUPPORTED;
         final Desktop desktop = Desktop.getDesktop();
@@ -108,18 +108,17 @@ public final class FileImpl implements File {
 
     public ErrorCode properties() {
         if (DEBUG)
-            System.out.println("Properties of " + path + name);
+            System.out.println("PROPERTIES OF " + path + name);
         final Path p = Paths.get(path + name);
-        BasicFileAttributes attrs = null;
         try {
-            attrs = Files.readAttributes(p, BasicFileAttributes.class);
+            final BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class);
+            System.out.println("Size: " + attrs.size());
+            System.out.println("Creation time: " + attrs.creationTime());
+            System.out.println("Last access time: " + attrs.lastAccessTime());
+            System.out.println("Last modified time: " + attrs.lastModifiedTime());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Size: " + attrs.size());
-        System.out.println("Creation time: " + attrs.creationTime());
-        System.out.println("Last access time: " + attrs.lastAccessTime());
-        System.out.println("Last modified time: " + attrs.lastModifiedTime());
         final java.io.File file = new java.io.File(path + name);
         System.out.println("Readable: " + file.canRead());
         System.out.println("Writable: " + file.canWrite());

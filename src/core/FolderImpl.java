@@ -18,7 +18,7 @@ public final class FolderImpl implements Folder {
     private volatile String path, name;
 
     public FolderImpl(final String path, final String name) {
-        this.path = path.endsWith("/") ? path : path + '/';
+        this.path = path.endsWith("/") ? path : (path + '/');
         this.name = name;
         if (!doesExist())
             create(".", new String[] { name });
@@ -43,7 +43,7 @@ public final class FolderImpl implements Folder {
 
     public boolean doesExist() {
         if (DEBUG)
-            System.out.println("Checking if " + path + name + " exists");
+            System.out.println("CHECKING IF " + path + name + " EXISTS");
         return Files.exists(Path.of(path, name)) && Files.isDirectory(Path.of(path, name));
     }
 
@@ -59,9 +59,10 @@ public final class FolderImpl implements Folder {
                     return ErrorCode.ILLEGAL_NAME;
         for (final String newFolderName : names) {
             if (DEBUG)
-                System.out.println("Creating " + destination + newFolderName);
+                System.out.println(
+                        "CREATING " + (destination.equals(".") ? (path + name + '/') : destination) + newFolderName);
             final String fullPath = (destination.equals(".") ? (path + name + '/') : destination) + newFolderName;
-            Path pathToFolder = Paths.get(fullPath);
+            final Path pathToFolder = Paths.get(fullPath);
             try {
                 Files.createDirectories(pathToFolder);
             } catch (IOException e) {
@@ -77,10 +78,10 @@ public final class FolderImpl implements Folder {
 
     public ErrorCode copy(final String destination, final String newName) {
         if (DEBUG)
-            System.out.println("Copying " + path + name + " to " + destination + newName);
+            System.out.println("COPYING " + path + name + " TO " + destination + newName);
         final Path sourcePath = Paths.get(path + name);
         final Path targetPath = Paths.get(destination + newName);
-        try {
+        try { // scope of coupling FileImpl/FolderImpl with this try block
             Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
@@ -145,7 +146,7 @@ public final class FolderImpl implements Folder {
                 nameOnly = nameOnly.substring(1 + nameOnly.indexOf('.'));
             entityList.set(i, nameOnly);
             if (DEBUG)
-                System.out.println("Name of Entity in " + fullPath + " is " + nameOnly);
+                System.out.println("NAME OF THE ENTITY IN " + fullPath + " IS " + nameOnly);
         }
         return entityList;
     }
@@ -173,7 +174,7 @@ public final class FolderImpl implements Folder {
 
     public ErrorCode stepIn(final String target) {
         if (DEBUG)
-            System.out.println("Stepping in from path=" + path + " name=" + name + " to " + target);
+            System.out.println("STEPPING IN FROM PATH=" + path + " NAME=" + name + " TO " + target);
         final CopyOnWriteArrayList<String> Folders = getNameFromPathAndName(listFolders());
         if (!Folders.contains(target))
             return ErrorCode.FOLDER_NOT_FOUND;
@@ -184,19 +185,21 @@ public final class FolderImpl implements Folder {
 
     public ErrorCode stepOut() {
         if (DEBUG)
-            System.out.println("Stepping out path=" + path + " name=" + name);
+            System.out.print("STEPPING OUT OF PATH=" + path + " NAME=" + name);
         if (path.equals("/"))
             return ErrorCode.FOLDER_NOT_FOUND;
         final int lastSlash = path.lastIndexOf('/');
         final int secondLastIndex = path.lastIndexOf('/', lastSlash - 1);
         name = path.substring(1 + secondLastIndex, lastSlash);
         path = path.substring(0, secondLastIndex + 1);
+        if (DEBUG)
+            System.out.println(" TO PATH=" + path + " NAME=" + name);
         return ErrorCode.SUCCESS;
     }
 
     public ErrorCode cd(final String destination) { // doesnt handle a new absolute path and ~
         if (DEBUG)
-            System.out.println("cding into " + destination);
+            System.out.println("CHANGE DIR TO" + destination);
         final String[] segments = destination.split("/");
         for (final String segment : segments)
             if (segment.equals("."))
