@@ -65,8 +65,12 @@ public final class FolderImpl implements Folder {
             final Path pathToFolder = Paths.get(fullPath);
             try {
                 Files.createDirectories(pathToFolder);
+            } catch (UnsupportedOperationException e) {
+                return ErrorCode.OPERATION_NOT_SUPPORTED;
+            } catch (java.nio.file.FileAlreadyExistsException e) {
+                return ErrorCode.FILE_ALREADY_EXISTS;
             } catch (IOException e) {
-                e.printStackTrace();
+                return ErrorCode.IO_ERROR;
             }
         }
         return ErrorCode.SUCCESS;
@@ -99,6 +103,10 @@ public final class FolderImpl implements Folder {
                     return FileVisitResult.CONTINUE;
                 }
             });
+        } catch (UnsupportedOperationException e) {
+            return ErrorCode.OPERATION_NOT_SUPPORTED;
+        } catch (java.nio.file.FileAlreadyExistsException e) {
+            return ErrorCode.FILE_ALREADY_EXISTS;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -121,7 +129,8 @@ public final class FolderImpl implements Folder {
                 if (!Files.isDirectory(path))
                     files.add(path.toString());
         } catch (IOException | DirectoryIteratorException e) {
-            e.printStackTrace();
+            if (DEBUG)
+                e.printStackTrace();
         }
         return files;
     }
@@ -133,7 +142,8 @@ public final class FolderImpl implements Folder {
             for (final Path path : stream)
                 folders.add(path.toString());
         } catch (IOException | DirectoryIteratorException e) {
-            e.printStackTrace();
+            if (DEBUG)
+                e.printStackTrace();
         }
         return folders;
     }
