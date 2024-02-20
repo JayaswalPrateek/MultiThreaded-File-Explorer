@@ -117,6 +117,8 @@ public final class FileImpl implements File {
     public ErrorCode properties() {
         if (DEBUG)
             System.out.println("PROPERTIES OF " + path + name);
+        if (CriticalSectionHandler.isLocked(this))
+            return ErrorCode.FILE_IS_LOCKED;
         final Path p = Paths.get(path + name);
         try {
             final BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class);
