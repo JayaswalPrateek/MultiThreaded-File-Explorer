@@ -70,6 +70,9 @@ interface Entity extends Runnable {
         }
     }
 
+    @Override
+    String toString();
+
     String getPath();
 
     String getName();
