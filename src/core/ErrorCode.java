@@ -1,11 +1,15 @@
 package core;
 
 public enum ErrorCode {
+
     SUCCESS(0, "Success"),
-    FILE_NOT_FOUND(1, "File Not Found"),
-    FOLDER_NOT_FOUND(2, "Folder Not Found"),
-    OPERATION_NOT_SUPPORTED(3, "Operation Not Supported"),
-    ILLEGAL_NAME(4, "Name contains Illegal Character");
+    DIR_NOT_EMPTY(1, "Directory is not empty"),
+    DIR_NOT_FOUND(2, "Folder Not Found"),
+    FILE_NOT_FOUND(3, "File Not Found"),
+    ILLEGAL_NAME(4, "Name contains Illegal Character"),
+    IO_ERROR(5, "IO Exception"),
+    OPERATION_NOT_SUPPORTED(6, "Operation Not Supported"),
+    UNKOWN_ERROR(7, "Unkown Error");
 
     private final int code;
     private final String message;

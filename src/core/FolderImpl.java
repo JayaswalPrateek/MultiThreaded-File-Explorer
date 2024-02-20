@@ -177,7 +177,7 @@ public final class FolderImpl implements Folder {
             System.out.println("STEPPING IN FROM PATH=" + path + " NAME=" + name + " TO " + target);
         final CopyOnWriteArrayList<String> Folders = getNameFromPathAndName(listFolders());
         if (!Folders.contains(target))
-            return ErrorCode.FOLDER_NOT_FOUND;
+            return ErrorCode.DIR_NOT_FOUND;
         path += name + '/';
         name = target;
         return ErrorCode.SUCCESS;
@@ -187,7 +187,7 @@ public final class FolderImpl implements Folder {
         if (DEBUG)
             System.out.print("STEPPING OUT OF PATH=" + path + " NAME=" + name);
         if (path.equals("/"))
-            return ErrorCode.FOLDER_NOT_FOUND;
+            return ErrorCode.DIR_NOT_FOUND;
         final int lastSlash = path.lastIndexOf('/');
         final int secondLastIndex = path.lastIndexOf('/', lastSlash - 1);
         name = path.substring(1 + secondLastIndex, lastSlash);
@@ -204,10 +204,10 @@ public final class FolderImpl implements Folder {
         for (final String segment : segments)
             if (segment.equals("."))
                 continue;
-            else if (segment.equals("..") && stepOut() == ErrorCode.FOLDER_NOT_FOUND)
-                return ErrorCode.FOLDER_NOT_FOUND;
-            else if (stepIn(segment) == ErrorCode.FOLDER_NOT_FOUND)
-                return ErrorCode.FOLDER_NOT_FOUND;
+            else if (segment.equals("..") && stepOut() == ErrorCode.DIR_NOT_FOUND)
+                return ErrorCode.DIR_NOT_FOUND;
+            else if (stepIn(segment) == ErrorCode.DIR_NOT_FOUND)
+                return ErrorCode.DIR_NOT_FOUND;
         return ErrorCode.SUCCESS;
     }
 }

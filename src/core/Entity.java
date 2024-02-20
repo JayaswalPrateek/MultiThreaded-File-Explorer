@@ -2,6 +2,7 @@ package core;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -54,18 +55,18 @@ interface Entity extends Runnable {
         }
 
         private static synchronized boolean isLocked(final Entity... entities) {
-            boolean lockedFlag = true;
+            boolean lockStatus = true;
             for (final Entity entity : entities)
-                if (!((entity instanceof File && lockedFiles.contains(entity))
-                        || (entity instanceof Folder && lockedFolders.contains(entity)))) {
-                    lockedFlag = false;
+                if ((entity instanceof File && !lockedFiles.contains(entity))
+                        || (entity instanceof Folder && !lockedFolders.contains(entity))) {
+                    lockStatus = false;
                     if (DEBUG)
                         System.out.println(entity + " NOT LOCKED");
                     break;
                 }
-            if (DEBUG && lockedFlag)
+            if (DEBUG && lockStatus)
                 System.out.println("ALL ENTITIES LOCKED");
-            return lockedFlag;
+            return lockStatus;
         }
     }
 
@@ -85,8 +86,14 @@ interface Entity extends Runnable {
                 System.out.println("DELETING " + destination + name);
             try {
                 Files.delete(Paths.get(name));
-            } catch (IOException e) {
-                return ErrorCode.OPERATION_NOT_SUPPORTED;
+            } catch (final NoSuchFileException e) {
+                return ErrorCode.FILE_NOT_FOUND;
+            } catch (final java.nio.file.DirectoryNotEmptyException e) {
+                return ErrorCode.DIR_NOT_EMPTY;
+            } catch (final IOException e) {
+                return ErrorCode.IO_ERROR;
+            } catch (final Exception e) {
+                return ErrorCode.UNKOWN_ERROR;
             }
         }
         return ErrorCode.SUCCESS;
@@ -108,8 +115,10 @@ interface Entity extends Runnable {
             final Path sourcePath = Path.of(obj.getPath() + obj.getName());
             final Path targetPath = Path.of((destination == "." ? obj.getPath() : destination) + newName);
             Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
+        } catch (UnsupportedOperationException e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
+        } catch (IOException e) {
+            return ErrorCode.IO_ERROR;
         }
         return ErrorCode.SUCCESS;
     }
