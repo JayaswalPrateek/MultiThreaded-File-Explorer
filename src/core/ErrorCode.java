@@ -4,15 +4,17 @@ public enum ErrorCode {
 
     SUCCESS(0, "Success"),
     DIR_ALREADY_EXISTS(1, "Directory already exists"),
-    DIR_NOT_EMPTY(2, "Directory is not empty"),
-    DIR_NOT_FOUND(3, "Folder Not Found"),
-    FILE_ALREADY_EXISTS(4, "File already exists"),
-    FILE_IS_LOCKED(5, "Cannot open locked file"),
-    FILE_NOT_FOUND(6, "File Not Found"),
-    ILLEGAL_NAME(7, "Name contains Illegal Character"),
-    IO_ERROR(8, "IO Exception"),
-    OPERATION_NOT_SUPPORTED(9, "Operation Not Supported"),
-    UNKOWN_ERROR(10, "Unkown Error");
+    DIR_IS_LOCKED(2, "Cannot work with locked Directories"),
+    DIR_NOT_EMPTY(3, "Directory is not empty"),
+    DIR_NOT_FOUND(4, "Folder Not Found"),
+    ENTITY_IS_LOCKED(5, "Cannot work with locked entities"),
+    FILE_ALREADY_EXISTS(6, "File already exists"),
+    FILE_IS_LOCKED(7, "Cannot work with locked files"),
+    FILE_NOT_FOUND(8, "File Not Found"),
+    ILLEGAL_NAME(9, "Name contains Illegal Character"),
+    IO_ERROR(10, "IO Exception"),
+    OPERATION_NOT_SUPPORTED(11, "Operation Not Supported"),
+    UNKOWN_ERROR(12, "Unkown Error");
 
     private final int code;
     private final String message;

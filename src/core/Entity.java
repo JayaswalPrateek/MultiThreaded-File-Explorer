@@ -107,6 +107,8 @@ interface Entity extends Runnable {
     ErrorCode create(final String... names);
 
     default ErrorCode delete(final String destination, final String... names) { // for files and empty directories
+        if (CriticalSectionHandler.isLocked(names))
+            return ErrorCode.ENTITY_IS_LOCKED;
         for (final String name : names) {
             if (DEBUG)
                 System.out.println("DELETING " + destination + name);
@@ -134,6 +136,8 @@ interface Entity extends Runnable {
     ErrorCode copy(final String destination);
 
     default ErrorCode move(final String destination, final Entity obj, final String newName) {
+        if (CriticalSectionHandler.isLocked(obj))
+            return ErrorCode.ENTITY_IS_LOCKED;
         if (DEBUG)
             System.out.println("MOVING " + obj.getPath() + obj.getName() + " to " + (destination == "." ? obj.getPath()
                     : destination) + newName);
@@ -154,6 +158,8 @@ interface Entity extends Runnable {
     }
 
     default ErrorCode rename(final String newName, final Entity obj) {
+        if (CriticalSectionHandler.isLocked(obj))
+            return ErrorCode.ENTITY_IS_LOCKED;
         if (DEBUG)
             System.out.print("RENAMING BY ");
         return move(".", obj, newName);
