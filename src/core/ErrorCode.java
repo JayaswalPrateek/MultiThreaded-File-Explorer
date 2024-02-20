@@ -7,11 +7,12 @@ public enum ErrorCode {
     DIR_NOT_EMPTY(2, "Directory is not empty"),
     DIR_NOT_FOUND(3, "Folder Not Found"),
     FILE_ALREADY_EXISTS(4, "File already exists"),
-    FILE_NOT_FOUND(5, "File Not Found"),
-    ILLEGAL_NAME(6, "Name contains Illegal Character"),
-    IO_ERROR(7, "IO Exception"),
-    OPERATION_NOT_SUPPORTED(8, "Operation Not Supported"),
-    UNKOWN_ERROR(9, "Unkown Error");
+    FILE_IS_LOCKED(5, "Cannot open locked file"),
+    FILE_NOT_FOUND(6, "File Not Found"),
+    ILLEGAL_NAME(7, "Name contains Illegal Character"),
+    IO_ERROR(8, "IO Exception"),
+    OPERATION_NOT_SUPPORTED(9, "Operation Not Supported"),
+    UNKOWN_ERROR(10, "Unkown Error");
 
     private final int code;
     private final String message;

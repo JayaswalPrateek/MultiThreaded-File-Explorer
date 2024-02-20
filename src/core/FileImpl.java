@@ -102,6 +102,8 @@ public final class FileImpl implements File {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
         if (!doesExist())
             return ErrorCode.FILE_NOT_FOUND;
+        if (CriticalSectionHandler.isLocked(this))
+            return ErrorCode.FILE_IS_LOCKED;
         final Desktop desktop = Desktop.getDesktop();
         final java.io.File file = new java.io.File(path + name);
         try {

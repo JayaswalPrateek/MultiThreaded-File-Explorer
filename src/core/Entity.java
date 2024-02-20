@@ -54,7 +54,7 @@ interface Entity extends Runnable {
                 System.exit(1);
         }
 
-        private static synchronized boolean isLocked(final Entity... entities) {
+        static synchronized boolean isLocked(final Entity... entities) {
             boolean lockStatus = true;
             for (final Entity entity : entities)
                 if ((entity instanceof File && !lockedFiles.contains(entity))
