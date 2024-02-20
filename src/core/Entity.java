@@ -64,9 +64,34 @@ interface Entity extends Runnable {
                         System.out.println(entity + " NOT LOCKED");
                     break;
                 }
-            if (DEBUG && lockStatus)
+            if (DEBUG)
                 System.out.println("ALL ENTITIES LOCKED");
-            return lockStatus;
+            return true;
+        }
+
+        static synchronized boolean isLocked(final String... names) {
+            for (final String name : names) {
+                boolean lockStatus = false;
+                for (final Entity entity : lockedFiles)
+                    if (entity.getName().equals(name)) {
+                        lockStatus = true;
+                        break;
+                    }
+                if (!lockStatus)
+                    for (final Entity entity : lockedFolders)
+                        if (entity.getName().equals(name)) {
+                            lockStatus = true;
+                            break;
+                        }
+                if (!lockStatus) {
+                    if (DEBUG)
+                        System.out.println(name + " NOT LOCKED");
+                    return false;
+                }
+            }
+            if (DEBUG)
+                System.out.println("ALL NAMES LOCKED");
+            return true;
         }
     }
 
