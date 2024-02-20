@@ -58,8 +58,10 @@ public final class FileImpl implements File {
             final Path pathToFile = Paths.get(fullPath);
             try {
                 Files.createFile(pathToFile);
+            } catch (UnsupportedOperationException e) {
+                return ErrorCode.OPERATION_NOT_SUPPORTED;
             } catch (IOException e) {
-                e.printStackTrace();
+                return ErrorCode.IO_ERROR;
             }
         }
         return ErrorCode.SUCCESS;
@@ -76,8 +78,10 @@ public final class FileImpl implements File {
         final Path targetPath = Paths.get(destination + newName);
         try {
             Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (UnsupportedOperationException e) {
+            return ErrorCode.OPERATION_NOT_SUPPORTED;
         } catch (IOException e) {
-            e.printStackTrace();
+            return ErrorCode.IO_ERROR;
         }
         return ErrorCode.SUCCESS;
     }
@@ -96,12 +100,14 @@ public final class FileImpl implements File {
             System.out.println("OPENING " + path + name);
         if (!Desktop.isDesktopSupported())
             return ErrorCode.OPERATION_NOT_SUPPORTED;
+        if (!doesExist())
+            return ErrorCode.FILE_NOT_FOUND;
         final Desktop desktop = Desktop.getDesktop();
         final java.io.File file = new java.io.File(path + name);
         try {
             desktop.open(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            return ErrorCode.IO_ERROR;
         }
         return ErrorCode.SUCCESS;
     }
@@ -112,17 +118,19 @@ public final class FileImpl implements File {
         final Path p = Paths.get(path + name);
         try {
             final BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class);
+            final java.io.File file = new java.io.File(path + name);
             System.out.println("Size: " + attrs.size());
             System.out.println("Creation time: " + attrs.creationTime());
             System.out.println("Last access time: " + attrs.lastAccessTime());
             System.out.println("Last modified time: " + attrs.lastModifiedTime());
+            System.out.println("Readable: " + file.canRead());
+            System.out.println("Writable: " + file.canWrite());
+            System.out.println("Executable: " + file.canExecute());
+        } catch (UnsupportedOperationException e) {
+            return ErrorCode.OPERATION_NOT_SUPPORTED;
         } catch (IOException e) {
-            e.printStackTrace();
+            return ErrorCode.IO_ERROR;
         }
-        final java.io.File file = new java.io.File(path + name);
-        System.out.println("Readable: " + file.canRead());
-        System.out.println("Writable: " + file.canWrite());
-        System.out.println("Executable: " + file.canExecute());
         return ErrorCode.SUCCESS;
     }
 }

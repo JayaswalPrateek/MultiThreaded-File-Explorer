@@ -3,13 +3,15 @@ package core;
 public enum ErrorCode {
 
     SUCCESS(0, "Success"),
-    DIR_NOT_EMPTY(1, "Directory is not empty"),
-    DIR_NOT_FOUND(2, "Folder Not Found"),
-    FILE_NOT_FOUND(3, "File Not Found"),
-    ILLEGAL_NAME(4, "Name contains Illegal Character"),
-    IO_ERROR(5, "IO Exception"),
-    OPERATION_NOT_SUPPORTED(6, "Operation Not Supported"),
-    UNKOWN_ERROR(7, "Unkown Error");
+    DIR_ALREADY_EXISTS(1, "Directory already exists"),
+    DIR_NOT_EMPTY(2, "Directory is not empty"),
+    DIR_NOT_FOUND(3, "Folder Not Found"),
+    FILE_ALREADY_EXISTS(4, "File already exists"),
+    FILE_NOT_FOUND(5, "File Not Found"),
+    ILLEGAL_NAME(6, "Name contains Illegal Character"),
+    IO_ERROR(7, "IO Exception"),
+    OPERATION_NOT_SUPPORTED(8, "Operation Not Supported"),
+    UNKOWN_ERROR(9, "Unkown Error");
 
     private final int code;
     private final String message;
