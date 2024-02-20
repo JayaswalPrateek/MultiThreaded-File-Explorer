@@ -81,6 +81,8 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode copy(final String destination, final String newName) {
+        if (CriticalSectionHandler.isLocked(this))
+            return ErrorCode.DIR_IS_LOCKED;
         if (DEBUG)
             System.out.println("COPYING " + path + name + " TO " + destination + newName);
         final Path sourcePath = Paths.get(path + name);
