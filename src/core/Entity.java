@@ -20,7 +20,7 @@ interface Entity extends Runnable {
         private static volatile Set<Entity> lockedFiles = Collections.synchronizedSet(new HashSet<>());
         private static volatile Set<Entity> lockedFolders = Collections.synchronizedSet(new HashSet<>());
 
-        private static synchronized void lock(final Entity... entities) {
+        static synchronized void lock(final Entity... entities) {
             boolean allLockedSuccessfully = true;
             for (final Entity entity : entities)
                 if (entity instanceof File)
@@ -37,7 +37,7 @@ interface Entity extends Runnable {
                 System.exit(1);
         }
 
-        private static synchronized void unlock(final Entity... entities) {
+        static synchronized void unlock(final Entity... entities) {
             boolean allUnlockedSuccessfully = true;
             for (final Entity entity : entities)
                 if (entity instanceof File)
