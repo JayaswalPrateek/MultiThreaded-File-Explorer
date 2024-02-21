@@ -1,7 +1,6 @@
 package core;
 
 public enum ErrorCode {
-
     SUCCESS(0, "Success"),
     DIR_ALREADY_EXISTS(1, "Directory already exists"),
     DIR_IS_LOCKED(2, "Cannot work with locked Directories"),
@@ -22,6 +21,11 @@ public enum ErrorCode {
     ErrorCode(final int code, final String message) {
         this.code = code;
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return message;
     }
 
     final public int getCode() {
