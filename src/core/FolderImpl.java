@@ -34,32 +34,50 @@ public final class FolderImpl implements Folder {
     }
 
     public String getPath() {
-        return path;
+        CriticalSectionHandler.lock(this);
+        final String p = path;
+        CriticalSectionHandler.unlock(this);
+        return p;
     }
 
     public String getName() {
-        return name;
+        CriticalSectionHandler.lock(this);
+        final String n = name;
+        CriticalSectionHandler.unlock(this);
+        return n;
     }
 
     public boolean doesExist() {
         if (DEBUG)
             System.out.println("CHECKING IF " + path + name + " EXISTS");
-        return Files.exists(Path.of(path, name)) && Files.isDirectory(Path.of(path, name));
+        CriticalSectionHandler.lock(this);
+        final boolean result = Files.exists(Path.of(path, name)) && Files.isDirectory(Path.of(path, name));
+        CriticalSectionHandler.unlock(this);
+        return result;
     }
 
     @Override
     public boolean equals(final Object obj) {
+        CriticalSectionHandler.lock(this);
+        boolean result;
         if (this == obj)
-            return true;
-        if (obj == null || getClass() != obj.getClass())
-            return false;
-        Entity other = (Entity) obj;
-        return (this.getPath() + this.getName()).equals(other.getPath() + other.getName());
+            result = true;
+        else if (obj == null || getClass() != obj.getClass())
+            result = false;
+        else {
+            final Entity other = (Entity) obj;
+            result = (this.getPath() + this.getName()).equals(other.getPath() + other.getName());
+        }
+        CriticalSectionHandler.unlock(this);
+        return result;
     }
 
     @Override
     public String toString() {
-        return getPath() + getName();
+        CriticalSectionHandler.lock(this);
+        final String resultString = getPath() + getName();
+        CriticalSectionHandler.unlock(this);
+        return resultString;
     }
 
     public ErrorCode create(final String destination, final String... names) {
