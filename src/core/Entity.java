@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 interface Entity extends Runnable {
     static final boolean DEBUG = true;
@@ -17,81 +19,53 @@ interface Entity extends Runnable {
             .unmodifiableSet(new HashSet<>(Arrays.asList('/', '\\', ':', '*', '?', '"', '<', '>', '|')));
 
     final static class CriticalSectionHandler {
-        private static volatile Set<Entity> lockedFiles = Collections.synchronizedSet(new HashSet<>());
-        private static volatile Set<Entity> lockedFolders = Collections.synchronizedSet(new HashSet<>());
+        private static final ConcurrentHashMap<Entity, ReentrantLock> lockedEntities = new ConcurrentHashMap<>();
 
         static synchronized void lock(final Entity... entities) {
-            boolean allLockedSuccessfully = true;
             for (final Entity entity : entities)
-                if (entity instanceof File)
-                    allLockedSuccessfully = allLockedSuccessfully && lockedFiles.add(entity);
-                else
-                    allLockedSuccessfully = allLockedSuccessfully && lockedFolders.add(entity);
+                lockedEntities.computeIfAbsent(entity, k -> new ReentrantLock()).lock();
             if (DEBUG)
-                if (allLockedSuccessfully)
-                    for (final Entity entity : entities)
-                        System.out.println("LOCKED " + entity);
-                else
-                    System.out.println("FATAL: CANNOT RECOVER FROM PARTIAL LOCKING");
-            if (!allLockedSuccessfully)
-                System.exit(1);
+                for (final Entity entity : entities)
+                    System.out.println("LOCKED " + entity);
         }
 
         static synchronized void unlock(final Entity... entities) {
-            boolean allUnlockedSuccessfully = true;
-            for (final Entity entity : entities)
-                if (entity instanceof File)
-                    allUnlockedSuccessfully = allUnlockedSuccessfully && lockedFiles.remove(entity);
-                else
-                    allUnlockedSuccessfully = allUnlockedSuccessfully && lockedFolders.remove(entity);
+            for (final Entity entity : entities) {
+                final ReentrantLock lock = lockedEntities.get(entity);
+                if (lock != null && lock.isHeldByCurrentThread())
+                    lock.unlock();
+            }
             if (DEBUG)
-                if (allUnlockedSuccessfully)
-                    for (final Entity entity : entities)
-                        System.out.println("UNLOCKED " + entity);
-                else
-                    System.out.println("FATAL: CANNOT RECOVER FROM PARTIAL UNLOCKING");
-            if (!allUnlockedSuccessfully)
-                System.exit(1);
+                for (final Entity entity : entities)
+                    System.out.println("UNLOCKED " + entity);
         }
 
         static synchronized boolean isLocked(final Entity... entities) {
-            for (final Entity entity : entities)
-                if ((entity instanceof File && !lockedFiles.contains(entity))
-                        || (entity instanceof Folder && !lockedFolders.contains(entity))) {
+            for (final Entity entity : entities) {
+                final ReentrantLock lock = lockedEntities.get(entity);
+                if (!(lock != null && lock.isLocked())) {
                     if (DEBUG)
                         System.out.println(entity + " NOT LOCKED");
                     return false;
                 }
+            }
             if (DEBUG)
                 System.out.println("ALL ENTITIES LOCKED");
             return true;
         }
 
         static synchronized boolean isLocked(final String... names) {
-            for (final String name : names) {
-                boolean lockStatus = false;
-                for (final Entity entity : lockedFiles)
-                    if (entity.getName().equals(name)) {
-                        lockStatus = true;
-                        break;
-                    }
-                if (!lockStatus)
-                    for (final Entity entity : lockedFolders)
-                        if (entity.getName().equals(name)) {
-                            lockStatus = true;
-                            break;
-                        }
-                if (!lockStatus) {
-                    if (DEBUG)
-                        System.out.println(name + " NOT LOCKED");
-                    return false;
-                }
-            }
-            if (DEBUG)
-                System.out.println("ALL NAMES LOCKED");
-            return true;
+            final Set<Entity> entitySetFromNames = Collections.synchronizedSet(new HashSet<>());
+            for (final String name : names)
+                for (final Entity entity : lockedEntities.keySet())
+                    if (entity.getName().equals(name))
+                        entitySetFromNames.add(entity);
+            return isLocked(entitySetFromNames.toArray(new Entity[0]));
         }
     }
+
+    @Override
+    public boolean equals(final Object obj);
 
     @Override
     String toString();

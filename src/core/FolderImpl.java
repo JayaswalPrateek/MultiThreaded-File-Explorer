@@ -48,6 +48,16 @@ public final class FolderImpl implements Folder {
     }
 
     @Override
+    public boolean equals(final Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        Entity other = (Entity) obj;
+        return (this.getPath() + this.getName()).equals(other.getPath() + other.getName());
+    }
+
+    @Override
     public String toString() {
         return getPath() + getName();
     }
@@ -84,7 +94,7 @@ public final class FolderImpl implements Folder {
 
     public ErrorCode copy(final String destination, final String newName) {
         if (CriticalSectionHandler.isLocked(this))
-            return ErrorCode.DIR_IS_LOCKED;
+            return ErrorCode.ENTITY_IS_LOCKED;
         if (DEBUG)
             System.out.println("COPYING " + path + name + " TO " + destination + newName);
         final Path sourcePath = Paths.get(path + name);
