@@ -145,6 +145,8 @@ interface Entity extends Runnable {
         } catch (final Exception e) {
             return ErrorCode.UNKOWN_ERROR;
         }
+        obj.setPath(destination == "." ? obj.getPath() : destination);
+        obj.setName(newName);
         return ErrorCode.SUCCESS;
     }
 
@@ -157,9 +159,6 @@ interface Entity extends Runnable {
             return ErrorCode.ENTITY_IS_LOCKED;
         if (DEBUG)
             System.out.print("RENAMING BY ");
-        final ErrorCode result = move(".", obj, newName);
-        if (result == ErrorCode.SUCCESS)
-            obj.setName(newName);
-        return result;
+        return move(".", obj, newName);
     }
 }
