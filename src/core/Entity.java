@@ -21,12 +21,25 @@ interface Entity extends Runnable {
     final static class CriticalSectionHandler {
         private static final ConcurrentHashMap<Entity, ReentrantLock> lockedEntities = new ConcurrentHashMap<>();
 
+        private static synchronized Entity[] namesToEntities(final String... names) {
+            final Set<Entity> entitySetFromNames = Collections.synchronizedSet(new HashSet<>());
+            for (final String name : names)
+                for (final Entity entity : lockedEntities.keySet())
+                    if (entity.getName().equals(name))
+                        entitySetFromNames.add(entity);
+            return entitySetFromNames.toArray(new Entity[0]);
+        }
+
         static synchronized void lock(final Entity... entities) {
             for (final Entity entity : entities)
                 lockedEntities.computeIfAbsent(entity, k -> new ReentrantLock()).lock();
             if (DEBUG)
                 for (final Entity entity : entities)
                     System.out.println("LOCKED " + entity);
+        }
+
+        static synchronized void lock(final String... names) {
+            lock(namesToEntities(names));
         }
 
         static synchronized void unlock(final Entity... entities) {
@@ -38,6 +51,10 @@ interface Entity extends Runnable {
             if (DEBUG)
                 for (final Entity entity : entities)
                     System.out.println("UNLOCKED " + entity);
+        }
+
+        static synchronized void unlock(final String... names) {
+            unlock(namesToEntities(names));
         }
 
         static synchronized boolean isLocked(final Entity... entities) {
@@ -55,12 +72,7 @@ interface Entity extends Runnable {
         }
 
         static synchronized boolean isLocked(final String... names) {
-            final Set<Entity> entitySetFromNames = Collections.synchronizedSet(new HashSet<>());
-            for (final String name : names)
-                for (final Entity entity : lockedEntities.keySet())
-                    if (entity.getName().equals(name))
-                        entitySetFromNames.add(entity);
-            return isLocked(entitySetFromNames.toArray(new Entity[0]));
+            return isLocked(namesToEntities(names));
         }
     }
 
