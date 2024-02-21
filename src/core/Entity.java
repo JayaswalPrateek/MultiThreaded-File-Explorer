@@ -86,6 +86,10 @@ interface Entity extends Runnable {
 
     String getName();
 
+    void setPath(final String path);
+
+    void setName(final String name);
+
     boolean doesExist();
 
     ErrorCode create(final String destination, final String... names);
@@ -153,6 +157,9 @@ interface Entity extends Runnable {
             return ErrorCode.ENTITY_IS_LOCKED;
         if (DEBUG)
             System.out.print("RENAMING BY ");
-        return move(".", obj, newName);
+        final ErrorCode result = move(".", obj, newName);
+        if (result == ErrorCode.SUCCESS)
+            obj.setName(newName);
+        return result;
     }
 }

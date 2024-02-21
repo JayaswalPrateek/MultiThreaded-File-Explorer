@@ -41,6 +41,14 @@ public final class FileImpl implements File {
         return n;
     }
 
+    public void setPath(final String path) {
+        this.path = path;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
     public boolean doesExist() {
         if (DEBUG)
             System.out.println("CHECKING IF " + path + name + " EXISTS");
