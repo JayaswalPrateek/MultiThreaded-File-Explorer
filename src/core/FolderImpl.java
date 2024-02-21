@@ -48,11 +48,15 @@ public final class FolderImpl implements Folder {
     }
 
     public void setPath(final String path) {
+        CriticalSectionHandler.lock(this);
         this.path = path;
+        CriticalSectionHandler.unlock(this);
     }
 
     public void setName(final String name) {
+        CriticalSectionHandler.lock(this);
         this.name = name;
+        CriticalSectionHandler.unlock(this);
     }
 
     public boolean doesExist() {
