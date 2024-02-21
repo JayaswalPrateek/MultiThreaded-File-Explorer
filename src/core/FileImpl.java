@@ -123,11 +123,14 @@ public final class FileImpl implements File {
         final Desktop desktop = Desktop.getDesktop();
         final java.io.File file = new java.io.File(path + name);
         try {
+            CriticalSectionHandler.lock(this);
             desktop.open(file);
         } catch (final IOException e) {
             return ErrorCode.IO_ERROR;
         } catch (final Exception e) {
             return ErrorCode.UNKOWN_ERROR;
+        } finally {
+            CriticalSectionHandler.unlock(this);
         }
         return ErrorCode.SUCCESS;
     }
@@ -139,6 +142,7 @@ public final class FileImpl implements File {
             return ErrorCode.ENTITY_IS_LOCKED;
         final Path p = Paths.get(path + name);
         try {
+            CriticalSectionHandler.lock(this);
             final BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class);
             final java.io.File file = new java.io.File(path + name);
             System.out.println("Size: " + attrs.size());
@@ -154,6 +158,8 @@ public final class FileImpl implements File {
             return ErrorCode.IO_ERROR;
         } catch (final Exception e) {
             return ErrorCode.UNKOWN_ERROR;
+        } finally {
+            CriticalSectionHandler.unlock(this);
         }
         return ErrorCode.SUCCESS;
     }

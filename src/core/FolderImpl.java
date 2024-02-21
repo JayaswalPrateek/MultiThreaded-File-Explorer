@@ -141,6 +141,7 @@ public final class FolderImpl implements Folder {
     public CopyOnWriteArrayList<String> listFiles() {
         final CopyOnWriteArrayList<String> files = new CopyOnWriteArrayList<>();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name))) {
+            CriticalSectionHandler.lock(this);
             for (final Path path : stream)
                 if (!Files.isDirectory(path))
                     files.add(path.toString());
@@ -149,6 +150,8 @@ public final class FolderImpl implements Folder {
                 e.printStackTrace();
         } catch (final Exception e) {
             System.out.println(ErrorCode.UNKOWN_ERROR);
+        } finally {
+            CriticalSectionHandler.unlock(this);
         }
         return files;
     }
@@ -157,6 +160,7 @@ public final class FolderImpl implements Folder {
         final CopyOnWriteArrayList<String> folders = new CopyOnWriteArrayList<>();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name),
                 Files::isDirectory)) {
+            CriticalSectionHandler.lock(this);
             for (final Path path : stream)
                 folders.add(path.toString());
         } catch (final IOException | DirectoryIteratorException e) {
@@ -164,17 +168,21 @@ public final class FolderImpl implements Folder {
                 e.printStackTrace();
         } catch (final Exception e) {
             System.out.println(ErrorCode.UNKOWN_ERROR);
+        } finally {
+            CriticalSectionHandler.unlock(this);
         }
         return folders;
     }
 
     private CopyOnWriteArrayList<String> getNameFromPathAndName(final CopyOnWriteArrayList<String> entityList) {
         for (int i = 0; i < entityList.size(); i++) {
+            // CriticalSectionHandler.lock(entityList.toArray()[i]);
             final String fullPath = entityList.get(i);
             String nameOnly = fullPath.substring(fullPath.lastIndexOf('/') + 1);
             if (nameOnly.startsWith("."))
                 nameOnly = nameOnly.substring(1 + nameOnly.indexOf('.'));
             entityList.set(i, nameOnly);
+            // CriticalSectionHandler.lock(entityList.toArray()[i]);
             if (DEBUG)
                 System.out.println("NAME OF THE ENTITY IN " + fullPath + " IS " + nameOnly);
         }
@@ -187,6 +195,7 @@ public final class FolderImpl implements Folder {
 
         final CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
         final Pattern pattern = Pattern.compile(patternString);
+        CriticalSectionHandler.lock(this);
         for (final String candidateFile : Files) {
             final Matcher matcher = pattern.matcher(candidateFile);
             final boolean matchFound = matcher.matches();
@@ -199,6 +208,7 @@ public final class FolderImpl implements Folder {
             if (matchFound)
                 Filtered.add(candidateFolder);
         }
+        CriticalSectionHandler.unlock(this);
         return Filtered;
     }
 
