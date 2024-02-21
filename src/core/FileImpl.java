@@ -58,10 +58,12 @@ public final class FileImpl implements File {
             final Path pathToFile = Paths.get(fullPath);
             try {
                 Files.createFile(pathToFile);
-            } catch (UnsupportedOperationException e) {
+            } catch (final UnsupportedOperationException e) {
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 return ErrorCode.IO_ERROR;
+            } catch (final Exception e) {
+                return ErrorCode.UNKOWN_ERROR;
             }
         }
         return ErrorCode.SUCCESS;
@@ -80,10 +82,12 @@ public final class FileImpl implements File {
         final Path targetPath = Paths.get(destination + newName);
         try {
             Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (UnsupportedOperationException e) {
+        } catch (final UnsupportedOperationException e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return ErrorCode.IO_ERROR;
+        } catch (final Exception e) {
+            return ErrorCode.UNKOWN_ERROR;
         }
         return ErrorCode.SUCCESS;
     }
@@ -110,8 +114,10 @@ public final class FileImpl implements File {
         final java.io.File file = new java.io.File(path + name);
         try {
             desktop.open(file);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return ErrorCode.IO_ERROR;
+        } catch (final Exception e) {
+            return ErrorCode.UNKOWN_ERROR;
         }
         return ErrorCode.SUCCESS;
     }
@@ -132,10 +138,12 @@ public final class FileImpl implements File {
             System.out.println("Readable: " + file.canRead());
             System.out.println("Writable: " + file.canWrite());
             System.out.println("Executable: " + file.canExecute());
-        } catch (UnsupportedOperationException e) {
+        } catch (final UnsupportedOperationException e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return ErrorCode.IO_ERROR;
+        } catch (final Exception e) {
+            return ErrorCode.UNKOWN_ERROR;
         }
         return ErrorCode.SUCCESS;
     }

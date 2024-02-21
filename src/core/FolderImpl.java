@@ -65,12 +65,14 @@ public final class FolderImpl implements Folder {
             final Path pathToFolder = Paths.get(fullPath);
             try {
                 Files.createDirectories(pathToFolder);
-            } catch (UnsupportedOperationException e) {
+            } catch (final UnsupportedOperationException e) {
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
-            } catch (java.nio.file.FileAlreadyExistsException e) {
+            } catch (final java.nio.file.FileAlreadyExistsException e) {
                 return ErrorCode.FILE_ALREADY_EXISTS;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 return ErrorCode.IO_ERROR;
+            } catch (final Exception e) {
+                return ErrorCode.UNKOWN_ERROR;
             }
         }
         return ErrorCode.SUCCESS;
@@ -105,12 +107,14 @@ public final class FolderImpl implements Folder {
                     return FileVisitResult.CONTINUE;
                 }
             });
-        } catch (UnsupportedOperationException e) {
+        } catch (final UnsupportedOperationException e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
-        } catch (java.nio.file.FileAlreadyExistsException e) {
+        } catch (final java.nio.file.FileAlreadyExistsException e) {
             return ErrorCode.FILE_ALREADY_EXISTS;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
+        } catch (final Exception e) {
+            return ErrorCode.UNKOWN_ERROR;
         }
         return ErrorCode.SUCCESS;
     }
@@ -130,9 +134,11 @@ public final class FolderImpl implements Folder {
             for (final Path path : stream)
                 if (!Files.isDirectory(path))
                     files.add(path.toString());
-        } catch (IOException | DirectoryIteratorException e) {
+        } catch (final IOException | DirectoryIteratorException e) {
             if (DEBUG)
                 e.printStackTrace();
+        } catch (final Exception e) {
+            System.out.println(ErrorCode.UNKOWN_ERROR);
         }
         return files;
     }
@@ -143,9 +149,11 @@ public final class FolderImpl implements Folder {
                 Files::isDirectory)) {
             for (final Path path : stream)
                 folders.add(path.toString());
-        } catch (IOException | DirectoryIteratorException e) {
+        } catch (final IOException | DirectoryIteratorException e) {
             if (DEBUG)
                 e.printStackTrace();
+        } catch (final Exception e) {
+            System.out.println(ErrorCode.UNKOWN_ERROR);
         }
         return folders;
     }

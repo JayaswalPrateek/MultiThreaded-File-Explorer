@@ -145,10 +145,12 @@ interface Entity extends Runnable {
             final Path sourcePath = Path.of(obj.getPath() + obj.getName());
             final Path targetPath = Path.of((destination == "." ? obj.getPath() : destination) + newName);
             Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (UnsupportedOperationException e) {
+        } catch (final UnsupportedOperationException e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return ErrorCode.IO_ERROR;
+        } catch (final Exception e) {
+            return ErrorCode.UNKOWN_ERROR;
         }
         return ErrorCode.SUCCESS;
     }
