@@ -95,6 +95,9 @@ interface Entity extends Runnable {
     default ErrorCode delete(final String destination, final String... names) { // for files and empty directories
         if (CriticalSectionHandler.isLocked(names))
             return ErrorCode.ENTITY_IS_LOCKED;
+        for (final String name : names)
+            if ((getPath() + getName()).startsWith(destination + name))
+                return ErrorCode.OPERATION_NOT_SUPPORTED;
         for (final String name : names) {
             if (DEBUG)
                 System.out.println("DELETING " + destination + name);
