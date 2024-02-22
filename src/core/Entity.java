@@ -125,38 +125,4 @@ interface Entity extends Runnable {
     default ErrorCode delete(final Entity obj, final String... names) {
         return delete(obj.getPath(), names);
     }
-
-    default ErrorCode move(final String destination, final Entity obj, final String newName) {
-        if (CriticalSectionHandler.isLocked(obj))
-            return ErrorCode.ENTITY_IS_LOCKED;
-        if (DEBUG)
-            System.out.println("MOVING " + obj.getPath() + obj.getName() + " to " + (destination == "." ? obj.getPath()
-                    : destination) + newName);
-        try {
-            final Path sourcePath = Path.of(obj.getPath() + obj.getName());
-            final Path targetPath = Path.of((destination == "." ? obj.getPath() : destination) + newName);
-            Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (final UnsupportedOperationException e) {
-            return ErrorCode.OPERATION_NOT_SUPPORTED;
-        } catch (final IOException e) {
-            return ErrorCode.IO_ERROR;
-        } catch (final Exception e) {
-            return ErrorCode.UNKOWN_ERROR;
-        }
-        obj.setPath(destination == "." ? obj.getPath() : destination);
-        obj.setName(newName);
-        return ErrorCode.SUCCESS;
-    }
-
-    default ErrorCode move(final String destination, final Entity obj) {
-        return move(destination, obj, obj.getName());
-    }
-
-    default ErrorCode rename(final String newName, final Entity obj) {
-        if (CriticalSectionHandler.isLocked(obj))
-            return ErrorCode.ENTITY_IS_LOCKED;
-        if (DEBUG)
-            System.out.print("RENAMING BY ");
-        return move(".", obj, newName);
-    }
 }
