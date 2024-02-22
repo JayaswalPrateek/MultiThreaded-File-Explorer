@@ -24,6 +24,11 @@ public final class FolderImpl implements Folder {
             create(".", new String[] { name });
     }
 
+    public FolderImpl(final String pathWithName) {
+        this(pathWithName.substring(0, pathWithName.lastIndexOf('/' + 1)),
+                pathWithName.substring(pathWithName.lastIndexOf('/' + 1)));
+    }
+
     public FolderImpl(final FolderImpl obj) {
         this(obj.path, obj.name + "-copy");
         copy(".", name);
@@ -129,7 +134,7 @@ public final class FolderImpl implements Folder {
             System.out.println("COPYING " + path + name + " TO " + destination + newName);
         final Path sourcePath = Paths.get(path + name);
         final Path targetPath = Paths.get(destination + newName);
-        try { // scope of coupling FileImpl/FolderImpl with this try block
+        try {
             Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
