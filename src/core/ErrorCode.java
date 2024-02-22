@@ -6,12 +6,13 @@ public enum ErrorCode {
     DIR_NOT_EMPTY(2, "Directory is not empty"),
     DIR_NOT_FOUND(3, "Folder Not Found"),
     ENTITY_IS_LOCKED(4, "Cannot work with locked entities"),
-    FILE_ALREADY_EXISTS(5, "File already exists"),
-    FILE_NOT_FOUND(6, "File Not Found"),
-    ILLEGAL_NAME(7, "Name contains Illegal Character"),
-    IO_ERROR(8, "IO Exception"),
-    OPERATION_NOT_SUPPORTED(9, "Operation Not Supported"),
-    UNKOWN_ERROR(10, "Unkown Error");
+    ENTITY_NOT_FOUND(5, "No such file/folder found"),
+    FILE_ALREADY_EXISTS(6, "File already exists"),
+    FILE_NOT_FOUND(7, "File Not Found"),
+    ILLEGAL_NAME(8, "Name contains Illegal Character"),
+    IO_ERROR(9, "IO Exception"),
+    OPERATION_NOT_SUPPORTED(10, "Operation Not Supported"),
+    UNKOWN_ERROR(11, "Unkown Error");
 
     private final int code;
     private final String message;
