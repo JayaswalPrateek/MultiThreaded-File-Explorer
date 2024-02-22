@@ -1,3 +1,5 @@
+// add logc to know if its a file or a folder and accoridingly call move
+
 package core;
 
 import java.io.IOException;
@@ -125,6 +127,10 @@ public final class FolderImpl implements Folder {
 
     public ErrorCode create(final String... names) {
         return create(".", names);
+    }
+
+    public ErrorCode createNewFile(final String newFileName) {
+        return new FileImpl(newFileName, this).create(new String[] { newFileName });
     }
 
     public ErrorCode copy(final String destination, final String newName) {

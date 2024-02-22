@@ -9,6 +9,8 @@ interface Folder extends Entity {
 
     CopyOnWriteArrayList<String> regexFilter(final String patternString);
 
+    ErrorCode createNewFile(final String newFileName);
+
     ErrorCode stepIn(final String target);
 
     ErrorCode stepOut();
