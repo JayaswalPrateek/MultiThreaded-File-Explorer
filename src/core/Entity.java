@@ -45,8 +45,10 @@ interface Entity extends Runnable {
         static synchronized void unlock(final Entity... entities) {
             for (final Entity entity : entities) {
                 final ReentrantLock lock = lockedEntities.get(entity);
-                if (lock != null && lock.isHeldByCurrentThread())
+                if (lock != null && lock.isHeldByCurrentThread()) {
                     lock.unlock();
+                    lockedEntities.remove(entity);
+                }
             }
             if (DEBUG)
                 for (final Entity entity : entities)
