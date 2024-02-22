@@ -79,7 +79,7 @@ interface Entity extends Runnable {
     }
 
     @Override
-    public boolean equals(final Object obj);
+    boolean equals(final Object obj);
 
     @Override
     String toString();
