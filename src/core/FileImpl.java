@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.awt.Desktop;
 
@@ -20,7 +19,7 @@ public final class FileImpl implements File {
 
     public FileImpl(final FileImpl obj) {
         this(obj.path, obj.name + "-copy");
-        copy(".", name);
+        new FolderImpl(obj.getPath()).copy(".", name);
     }
 
     public FileImpl(final String newName, final FolderImpl obj) {
@@ -111,29 +110,6 @@ public final class FileImpl implements File {
 
     public ErrorCode create(final String... names) {
         return create(".", names);
-    }
-
-    public ErrorCode copy(final String destination, final String newName) {
-        if (CriticalSectionHandler.isLocked(this))
-            return ErrorCode.ENTITY_IS_LOCKED;
-        if (DEBUG)
-            System.out.println("COPYING " + path + name + " TO " + destination + newName);
-        final Path sourcePath = Paths.get(path + name);
-        final Path targetPath = Paths.get(destination + newName);
-        try {
-            Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (final UnsupportedOperationException e) {
-            return ErrorCode.OPERATION_NOT_SUPPORTED;
-        } catch (final IOException e) {
-            return ErrorCode.IO_ERROR;
-        } catch (final Exception e) {
-            return ErrorCode.UNKOWN_ERROR;
-        }
-        return ErrorCode.SUCCESS;
-    }
-
-    public ErrorCode copy(final String destination) {
-        return copy(destination, name);
     }
 
     public void run() {

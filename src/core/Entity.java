@@ -126,10 +126,6 @@ interface Entity extends Runnable {
         return delete(obj.getPath(), names);
     }
 
-    ErrorCode copy(final String destination, final String newName);
-
-    ErrorCode copy(final String destination);
-
     default ErrorCode move(final String destination, final Entity obj, final String newName) {
         if (CriticalSectionHandler.isLocked(obj))
             return ErrorCode.ENTITY_IS_LOCKED;
