@@ -1,7 +1,63 @@
 package core;
 
-interface File extends Entity {
-    ErrorCode open();
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.awt.Desktop;
 
-    ErrorCode properties();
+interface File extends Entity {
+    static ErrorCode open(final String path, final String name) {
+        if (DEBUG)
+            System.out.println("OPENING " + path + name);
+        if (!Desktop.isDesktopSupported())
+            return ErrorCode.OPERATION_NOT_SUPPORTED;
+        if (!Files.exists(Path.of(path, name)))
+            return ErrorCode.FILE_NOT_FOUND;
+        if (CriticalSectionHandler.isLocked(path + name))
+            return ErrorCode.ENTITY_IS_LOCKED;
+        final Desktop desktop = Desktop.getDesktop();
+        final java.io.File file = new java.io.File(path + name);
+        try {
+            CriticalSectionHandler.lock(path + name);
+            desktop.open(file);
+        } catch (final IOException e) {
+            return ErrorCode.IO_ERROR;
+        } catch (final Exception e) {
+            return ErrorCode.UNKOWN_ERROR;
+        } finally {
+            CriticalSectionHandler.unlock(path + name);
+        }
+        return ErrorCode.SUCCESS;
+    }
+
+    static ErrorCode properties(final String path, final String name) {
+        if (DEBUG)
+            System.out.println("PROPERTIES OF " + path + name);
+        if (CriticalSectionHandler.isLocked(path + name))
+            return ErrorCode.ENTITY_IS_LOCKED;
+        final Path p = Paths.get(path + name);
+        try {
+            CriticalSectionHandler.lock(path + name);
+            final BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class);
+            final java.io.File file = new java.io.File(path + name);
+            System.out.println("Size: " + attrs.size());
+            System.out.println("Creation time: " + attrs.creationTime());
+            System.out.println("Last access time: " + attrs.lastAccessTime());
+            System.out.println("Last modified time: " + attrs.lastModifiedTime());
+            System.out.println("Readable: " + file.canRead());
+            System.out.println("Writable: " + file.canWrite());
+            System.out.println("Executable: " + file.canExecute());
+        } catch (final UnsupportedOperationException e) {
+            return ErrorCode.OPERATION_NOT_SUPPORTED;
+        } catch (final IOException e) {
+            return ErrorCode.IO_ERROR;
+        } catch (final Exception e) {
+            return ErrorCode.UNKOWN_ERROR;
+        } finally {
+            CriticalSectionHandler.unlock(path + name);
+        }
+        return ErrorCode.SUCCESS;
+    }
 }
