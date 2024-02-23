@@ -2,14 +2,14 @@ package core;
 
 public enum ErrorCode {
     SUCCESS(0, "Success"),
-    DIR_ALREADY_EXISTS(1, "Directory already exists"),
-    DIR_NOT_EMPTY(2, "Directory is not empty"),
-    DIR_NOT_FOUND(3, "Folder Not Found"),
-    ENTITY_IS_LOCKED(4, "Cannot work with locked entities"),
-    ENTITY_NOT_FOUND(5, "No such file/folder found"),
-    FILE_ALREADY_EXISTS(6, "File already exists"),
+    DIR_ALREADY_EXISTS(1, "Directory Already Exists"),
+    DIR_NOT_EMPTY(2, "Directory Not Empty"),
+    DIR_NOT_FOUND(3, "Directory Not Found"),
+    ENTITY_IS_LOCKED(4, "Cannot Use Busy Entity"),
+    ENTITY_NOT_FOUND(5, "No Such File/Directory Found"),
+    FILE_ALREADY_EXISTS(6, "File Already Exists"),
     FILE_NOT_FOUND(7, "File Not Found"),
-    ILLEGAL_NAME(8, "Name contains Illegal Character"),
+    ILLEGAL_NAME(8, "Name Contains Illegal Character"),
     IO_ERROR(9, "IO Exception"),
     OPERATION_NOT_SUPPORTED(10, "Operation Not Supported"),
     UNKOWN_ERROR(11, "Unkown Error");
