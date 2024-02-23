@@ -17,24 +17,51 @@ import java.util.regex.Pattern;
 public final class FolderImpl implements Folder {
     private volatile String path, name;
 
-    public FolderImpl(final String path, final String name) {
+    private static final class Splitter {
+        private final String path, name;
+
+        Splitter(final String pathWithName) {
+            path = pathWithName.substring(0, 1 + pathWithName.lastIndexOf('/'));
+            name = pathWithName.substring(1 + pathWithName.lastIndexOf('/'));
+            if (DEBUG)
+                System.out.println("Splitting " + pathWithName + " into " + path + " and " + name);
+        }
+
+        String getPath() {
+            return path;
+        }
+
+        String getName() {
+            return name;
+        }
+    }
+
+    private static final String homeDirPath = System.getProperty("user.home");
+    private static final FolderImpl singletonObj = new FolderImpl(new Splitter(homeDirPath).getPath(),
+            new Splitter(homeDirPath).getName());
+
+    public static FolderImpl getInstance() {
+        return singletonObj;
+    }
+
+    private FolderImpl(final String path, final String name) {
         this.path = path.endsWith("/") ? path : (path + '/');
         this.name = name;
         if (!doesExist())
             create(".", new String[] { name });
     }
 
-    public FolderImpl(final String pathWithName) {
+    private FolderImpl(final String pathWithName) {
         this(pathWithName.substring(0, pathWithName.lastIndexOf('/' + 1)),
                 pathWithName.substring(pathWithName.lastIndexOf('/' + 1)));
     }
 
-    public FolderImpl(final FolderImpl obj) {
+    private FolderImpl(final FolderImpl obj) {
         this(obj.path, obj.name + "-copy");
         copy(".", name);
     }
 
-    public FolderImpl(final String newName, final FolderImpl obj) {
+    private FolderImpl(final String newName, final FolderImpl obj) {
         this(obj.getPath() + obj.getName(), newName);
     }
 

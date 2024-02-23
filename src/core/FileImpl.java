@@ -15,10 +15,10 @@ final class FileImpl implements File {
             create(".", new String[] { name });
     }
 
-    public FileImpl(final FileImpl obj) {
-        this(obj.path, obj.name + "-copy");
-        new FolderImpl(obj.getPath()).copy(".", name);
-    }
+    // public FileImpl(final FileImpl obj) {
+    // this(obj.path, obj.name + "-copy");
+    // new FolderImpl(obj.getPath()).copy(".", name);
+    // }
 
     public FileImpl(final String newName, final FolderImpl obj) {
         this(obj.getPath() + obj.getName(), newName);
