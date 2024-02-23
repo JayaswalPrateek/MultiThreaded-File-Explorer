@@ -82,8 +82,7 @@ public final class FolderImpl implements Folder {
         else if (obj == null || getClass() != obj.getClass())
             result = false;
         else {
-            final Entity other = (Entity) obj;
-            result = (this.getPath() + this.getName()).equals(other.getPath() + other.getName());
+            result = this.toString().equals(obj.toString());
         }
         CriticalSectionHandler.unlock(this);
         return result;
@@ -106,10 +105,9 @@ public final class FolderImpl implements Folder {
             if (DEBUG)
                 System.out.println(
                         "CREATING " + (destination.equals(".") ? (path + name + '/') : destination) + newFolderName);
-            final String fullPath = (destination.equals(".") ? (path + name + '/') : destination) + newFolderName;
-            final Path pathToFolder = Paths.get(fullPath);
             try {
-                Files.createDirectories(pathToFolder);
+                Files.createDirectories(
+                        Paths.get((destination.equals(".") ? (path + name + '/') : destination) + newFolderName));
             } catch (final UnsupportedOperationException e) {
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
             } catch (final java.nio.file.FileAlreadyExistsException e) {

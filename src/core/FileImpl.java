@@ -68,8 +68,7 @@ final class FileImpl implements File {
         else if (obj == null || getClass() != obj.getClass())
             result = false;
         else {
-            final Entity other = (Entity) obj;
-            result = (this.getPath() + this.getName()).equals(other.getPath() + other.getName());
+            result = this.toString().equals(obj.toString());
         }
         CriticalSectionHandler.unlock(this);
         return result;
@@ -91,10 +90,8 @@ final class FileImpl implements File {
         for (final String newFileName : names) {
             if (DEBUG)
                 System.out.println("CREATING " + (destination.equals(".") ? path : destination) + newFileName);
-            final String fullPath = (destination.equals(".") ? path : destination) + newFileName;
-            final Path pathToFile = Paths.get(fullPath);
             try {
-                Files.createFile(pathToFile);
+                Files.createFile(Paths.get((destination.equals(".") ? path : destination) + newFileName));
             } catch (final UnsupportedOperationException e) {
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
             } catch (final IOException e) {
