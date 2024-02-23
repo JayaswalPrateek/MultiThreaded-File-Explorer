@@ -182,55 +182,38 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    public ErrorCode move(final String destination, final String... namesWithoutPaths) {
+    private ErrorCode move(final String sourceName, final String targetName) {
         if (CriticalSectionHandler.isLocked(this))
             return ErrorCode.ENTITY_IS_LOCKED;
-        final CopyOnWriteArrayList<String> filesList = getNameFromPathAndName(listFiles());
-        final CopyOnWriteArrayList<String> foldersList = getNameFromPathAndName(listFolders());
-        for (final String name : namesWithoutPaths)
-            if (!filesList.contains(name) && !foldersList.contains(name))
-                return ErrorCode.ENTITY_NOT_FOUND;
-        for (final String name : namesWithoutPaths) {
-            if (DEBUG)
-                System.out.println(
-                        "MOVING " + getPath() + name + " TO " + (destination == "." ? getPath() : destination) + name);
-            try {
-                final Path sourcePath = Path.of(getPath() + name);
-                final Path targetPath = Path.of((destination == "." ? getPath() : destination) + name);
-                Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-            } catch (final UnsupportedOperationException e) {
-                return ErrorCode.OPERATION_NOT_SUPPORTED;
-            } catch (final IOException e) {
-                return ErrorCode.IO_ERROR;
-            } catch (final Exception e) {
-                return ErrorCode.UNKOWN_ERROR;
-            }
+        if (!getNameFromPathAndName(listFiles()).contains(sourceName) &&
+                !getNameFromPathAndName(listFolders()).contains(sourceName))
+            return ErrorCode.ENTITY_NOT_FOUND;
+        if (DEBUG)
+            System.out.println("MOVING " + getPath() + sourceName + " TO " + getPath() + targetName);
+        try {
+            Files.move(Path.of(getPath() + sourceName), Path.of(getPath() + targetName),
+                    StandardCopyOption.REPLACE_EXISTING);
+        } catch (UnsupportedOperationException e) {
+            return ErrorCode.OPERATION_NOT_SUPPORTED;
+        } catch (IOException e) {
+            return ErrorCode.IO_ERROR;
+        } catch (Exception e) {
+            return ErrorCode.UNKOWN_ERROR;
+        }
+        return ErrorCode.SUCCESS;
+    }
+
+    ErrorCode move(final String destination, final String... names) {
+        for (final String name : names) {
+            final ErrorCode result = move(destination, name);
+            if (result != ErrorCode.SUCCESS)
+                return result;
         }
         return ErrorCode.SUCCESS;
     }
 
     ErrorCode rename(final String oldName, final String newName) {
-        if (CriticalSectionHandler.isLocked(this))
-            return ErrorCode.ENTITY_IS_LOCKED;
-        final CopyOnWriteArrayList<String> filesList = getNameFromPathAndName(listFiles());
-        final CopyOnWriteArrayList<String> foldersList = getNameFromPathAndName(listFolders());
-        if (!filesList.contains(oldName) && !foldersList.contains(oldName))
-            return ErrorCode.ENTITY_NOT_FOUND;
-        if (DEBUG)
-            System.out.println(
-                    "RENAMING " + getPath() + oldName + " TO " + getPath() + newName);
-        try {
-            final Path sourcePath = Path.of(getPath() + oldName);
-            final Path targetPath = Path.of(getPath() + newName);
-            Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (final UnsupportedOperationException e) {
-            return ErrorCode.OPERATION_NOT_SUPPORTED;
-        } catch (final IOException e) {
-            return ErrorCode.IO_ERROR;
-        } catch (final Exception e) {
-            return ErrorCode.UNKOWN_ERROR;
-        }
-        return ErrorCode.SUCCESS;
+        return move(oldName, newName);
     }
 
     public void run() {
