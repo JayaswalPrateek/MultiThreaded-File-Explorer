@@ -17,11 +17,9 @@ interface File extends Entity {
             return ErrorCode.FILE_NOT_FOUND;
         if (CriticalSectionHandler.isLocked(path + name))
             return ErrorCode.ENTITY_IS_LOCKED;
-        final Desktop desktop = Desktop.getDesktop();
-        final java.io.File file = new java.io.File(path + name);
         try {
             CriticalSectionHandler.lock(path + name);
-            desktop.open(file);
+            Desktop.getDesktop().open(new java.io.File(path + name));
         } catch (final IOException e) {
             return ErrorCode.IO_ERROR;
         } catch (final Exception e) {
