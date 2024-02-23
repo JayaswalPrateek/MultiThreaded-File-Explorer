@@ -37,10 +37,9 @@ interface File extends Entity {
             System.out.println("PROPERTIES OF " + path + name);
         if (CriticalSectionHandler.isLocked(path + name))
             return ErrorCode.ENTITY_IS_LOCKED;
-        final Path p = Paths.get(path + name);
         try {
             CriticalSectionHandler.lock(path + name);
-            final BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class);
+            final BasicFileAttributes attrs = Files.readAttributes(Paths.get(path + name), BasicFileAttributes.class);
             final java.io.File file = new java.io.File(path + name);
             System.out.println("Size: " + attrs.size());
             System.out.println("Creation time: " + attrs.creationTime());
