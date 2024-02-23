@@ -17,52 +17,43 @@ interface Entity extends Runnable {
             .unmodifiableSet(new HashSet<>(Arrays.asList('/', '\\', ':', '*', '?', '"', '<', '>', '|')));
 
     final static class CriticalSectionHandler {
-        private static final ConcurrentHashMap<Entity, ReentrantLock> lockedEntities = new ConcurrentHashMap<>();
+        private static final ConcurrentHashMap<String, ReentrantLock> lockedEntities = new ConcurrentHashMap<>();
 
-        private static synchronized Entity[] namesToEntities(final String... names) {
-            final Set<Entity> entitySetFromNames = Collections.synchronizedSet(new HashSet<>());
-            for (final String name : names)
-                for (final Entity entity : lockedEntities.keySet())
-                    if (entity.getName().equals(name))
-                        entitySetFromNames.add(entity);
-            return entitySetFromNames.toArray(new Entity[0]);
+        static synchronized void lock(final String... pathsAndNames) {
+            for (final String pathAndName : pathsAndNames)
+                lockedEntities.computeIfAbsent(pathAndName, k -> new ReentrantLock()).lock();
+            if (DEBUG)
+                for (final String pathAndName : pathsAndNames)
+                    System.out.println("LOCKED " + pathAndName);
         }
 
         static synchronized void lock(final Entity... entities) {
-            for (final Entity entity : entities)
-                lockedEntities.computeIfAbsent(entity, k -> new ReentrantLock()).lock();
-            if (DEBUG)
-                for (final Entity entity : entities)
-                    System.out.println("LOCKED " + entity);
+            lock(Arrays.stream(entities).map(Object::toString).toArray(String[]::new));
         }
 
-        static synchronized void lock(final String... names) {
-            lock(namesToEntities(names));
-        }
-
-        static synchronized void unlock(final Entity... entities) {
-            for (final Entity entity : entities) {
-                final ReentrantLock lock = lockedEntities.get(entity);
+        static synchronized void unlock(final String... pathsAndNames) {
+            for (final String pathAndName : pathsAndNames) {
+                final ReentrantLock lock = lockedEntities.get(pathAndName);
                 if (lock != null && lock.isHeldByCurrentThread()) {
                     lock.unlock();
-                    lockedEntities.remove(entity);
+                    lockedEntities.remove(pathAndName);
                 }
             }
             if (DEBUG)
-                for (final Entity entity : entities)
-                    System.out.println("UNLOCKED " + entity);
+                for (final String pathAndName : pathsAndNames)
+                    System.out.println("UNLOCKED " + pathAndName);
         }
 
-        static synchronized void unlock(final String... names) {
-            unlock(namesToEntities(names));
+        static synchronized void unlock(final Entity... entities) {
+            unlock(Arrays.stream(entities).map(Object::toString).toArray(String[]::new));
         }
 
-        static synchronized boolean isLocked(final Entity... entities) {
-            for (final Entity entity : entities) {
-                final ReentrantLock lock = lockedEntities.get(entity);
+        static synchronized boolean isLocked(final String... pathsAndNames) {
+            for (final String pathAndName : pathsAndNames) {
+                final ReentrantLock lock = lockedEntities.get(pathAndName);
                 if (!(lock != null && lock.isLocked())) {
                     if (DEBUG)
-                        System.out.println(entity + " NOT LOCKED");
+                        System.out.println(pathAndName + " NOT LOCKED");
                     return false;
                 }
             }
@@ -71,8 +62,8 @@ interface Entity extends Runnable {
             return true;
         }
 
-        static synchronized boolean isLocked(final String... names) {
-            return isLocked(namesToEntities(names));
+        static synchronized boolean isLocked(final Entity... entities) {
+            return isLocked(Arrays.stream(entities).map(Object::toString).toArray(String[]::new));
         }
     }
 
