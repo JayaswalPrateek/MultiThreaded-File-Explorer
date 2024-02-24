@@ -100,7 +100,7 @@ interface Entity extends Runnable {
             if (DEBUG)
                 System.out.println("DELETING " + destination + name);
             try {
-                Files.delete(Paths.get(name));
+                Files.delete(Paths.get(destination + name));
             } catch (final NoSuchFileException e) {
                 return ErrorCode.FILE_NOT_FOUND;
             } catch (final java.nio.file.DirectoryNotEmptyException e) {
@@ -115,6 +115,8 @@ interface Entity extends Runnable {
     }
 
     default ErrorCode delete(final Entity obj, final String... names) {
-        return delete(obj.getPath(), names);
+        if (obj instanceof FileImpl)
+            return delete(obj.getPath(), names);
+        return delete(obj.getPath() + obj.getName() + '/', names);
     }
 }
