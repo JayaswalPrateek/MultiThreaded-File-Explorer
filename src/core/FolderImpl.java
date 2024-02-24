@@ -151,8 +151,8 @@ public final class FolderImpl implements Folder {
         return create(".", names);
     }
 
-    public synchronized ErrorCode createNewFile(final String newFileName) {
-        return new FileImpl(newFileName, this).create(new String[] { newFileName });
+    public synchronized ErrorCode createNewFile(final String... newFileNames) {
+        return new FileImpl(newFileNames[0], this).create(newFileNames);
     }
 
     public ErrorCode copy(final String destination, final String... namesWithoutPaths) {
@@ -249,7 +249,6 @@ public final class FolderImpl implements Folder {
     public CopyOnWriteArrayList<String> listFiles(final ListOption opt) {
         final CopyOnWriteArrayList<String> files = new CopyOnWriteArrayList<>();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name))) {
-            CriticalSectionHandler.lock(this);
             for (final Path path : stream)
                 if (!Files.isDirectory(path))
                     if (opt == ListOption.SHOW_HIDDEN || !Files.isHidden(path))
@@ -259,8 +258,6 @@ public final class FolderImpl implements Folder {
                 e.printStackTrace();
         } catch (final Exception e) {
             System.out.println(ErrorCode.UNKOWN_ERROR);
-        } finally {
-            CriticalSectionHandler.unlock(this);
         }
         return files;
     }
@@ -273,7 +270,6 @@ public final class FolderImpl implements Folder {
         final CopyOnWriteArrayList<String> folders = new CopyOnWriteArrayList<>();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name),
                 Files::isDirectory)) {
-            CriticalSectionHandler.lock(this);
             for (final Path path : stream)
                 if (opt == ListOption.SHOW_HIDDEN || !Files.isHidden(path))
                     folders.add(path.toString());
@@ -282,8 +278,6 @@ public final class FolderImpl implements Folder {
                 e.printStackTrace();
         } catch (final Exception e) {
             System.out.println(ErrorCode.UNKOWN_ERROR);
-        } finally {
-            CriticalSectionHandler.unlock(this);
         }
         return folders;
     }
@@ -294,31 +288,31 @@ public final class FolderImpl implements Folder {
 
     private CopyOnWriteArrayList<String> getNameFromPathAndName(final CopyOnWriteArrayList<String> entityList) {
         for (int i = 0; i < entityList.size(); i++) {
-            // CriticalSectionHandler.lock(entityList.toArray()[i]);
             final String fullPath = entityList.get(i);
             String nameOnly = fullPath.substring(fullPath.lastIndexOf('/') + 1);
             if (nameOnly.startsWith("."))
                 nameOnly = nameOnly.substring(1 + nameOnly.indexOf('.'));
             entityList.set(i, nameOnly);
-            // CriticalSectionHandler.lock(entityList.toArray()[i]);
-            if (DEBUG)
-                System.out.println("NAME OF THE ENTITY IN " + fullPath + " IS " + nameOnly);
         }
         return entityList;
     }
 
-    public CopyOnWriteArrayList<String> regexFilter(final String patternString) {
+    public CopyOnWriteArrayList<String> regexFilter(final String patternString, final ListOption opt) {
         final CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
         final Pattern pattern = Pattern.compile(patternString);
         CriticalSectionHandler.lock(this);
-        for (final String candidateFile : getNameFromPathAndName(listFiles()))
+        for (final String candidateFile : getNameFromPathAndName(listFiles(opt)))
             if (pattern.matcher(candidateFile).matches())
                 Filtered.add(candidateFile);
-        for (final String candidateFolder : getNameFromPathAndName(listFolders()))
+        for (final String candidateFolder : getNameFromPathAndName(listFolders(opt)))
             if (pattern.matcher(candidateFolder).matches())
                 Filtered.add(candidateFolder);
         CriticalSectionHandler.unlock(this);
         return Filtered;
+    }
+
+    public CopyOnWriteArrayList<String> regexFilter(final String patternString) {
+        return regexFilter(patternString, ListOption.NONE);
     }
 
     public ErrorCode stepIn(final String target) {
@@ -347,7 +341,7 @@ public final class FolderImpl implements Folder {
 
     public ErrorCode cd(final String destination) { // doesnt handle a new absolute path and ~
         if (DEBUG)
-            System.out.println("CHANGE DIR TO" + destination);
+            System.out.println("CHANGE DIR TO " + destination);
         for (final String segment : destination.split("/"))
             if (segment.equals("."))
                 continue;
