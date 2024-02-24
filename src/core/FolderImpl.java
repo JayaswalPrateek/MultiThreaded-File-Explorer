@@ -155,14 +155,15 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode copy(final String srcPath, final String srcName, final String destPath, final String destName) {
-        if (CriticalSectionHandler.isLocked(this))
-            return ErrorCode.ENTITY_IS_LOCKED;
         final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
                 + (srcName.equals(".") ? "" : srcName);
         final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
                 + (destName.equals(".") ? "" : destName);
         if (!Files.exists(Paths.get(srcFileLocation)))
             return ErrorCode.ENTITY_NOT_FOUND;
+        if (CriticalSectionHandler.isLocked(srcFileLocation, destFileLocation))
+            return ErrorCode.ENTITY_IS_LOCKED;
+        CriticalSectionHandler.lock(srcFileLocation, destFileLocation);
         if (DEBUG)
             System.out.println("COPYING " + srcFileLocation + " TO " + destFileLocation);
         try {
@@ -199,6 +200,8 @@ public final class FolderImpl implements Folder {
             e.printStackTrace();
         } catch (final Exception e) {
             return ErrorCode.UNKOWN_ERROR;
+        } finally {
+            CriticalSectionHandler.unlock(srcFileLocation, destFileLocation);
         }
         return ErrorCode.SUCCESS;
     }
@@ -213,8 +216,6 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode move(final String srcPath, final String srcName, final String destPath, final String destName) {
-        if (CriticalSectionHandler.isLocked(this))
-            return ErrorCode.ENTITY_IS_LOCKED;
         final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
                 + (srcName.equals(".") ? "" : srcName);
         final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
@@ -222,6 +223,9 @@ public final class FolderImpl implements Folder {
 
         if (!Files.exists(Paths.get(srcFileLocation)))
             return ErrorCode.ENTITY_NOT_FOUND;
+        if (CriticalSectionHandler.isLocked(srcFileLocation, destFileLocation))
+            return ErrorCode.ENTITY_IS_LOCKED;
+        CriticalSectionHandler.lock(srcFileLocation, destFileLocation);
         if (DEBUG)
             System.out.println("MOVING " + srcFileLocation + " TO " + destFileLocation);
         try {
@@ -233,6 +237,8 @@ public final class FolderImpl implements Folder {
             return ErrorCode.IO_ERROR;
         } catch (Exception e) {
             return ErrorCode.UNKOWN_ERROR;
+        } finally {
+            CriticalSectionHandler.unlock(srcFileLocation, destFileLocation);
         }
         return ErrorCode.SUCCESS;
     }
