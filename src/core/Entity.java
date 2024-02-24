@@ -95,6 +95,8 @@ interface Entity extends Runnable {
         for (final String name : names)
             if ((getPath() + getName()).startsWith(destination + name))
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
+        if (CriticalSectionHandler.isLocked(names))
+            return ErrorCode.ENTITY_IS_LOCKED;
         CriticalSectionHandler.lock(names);
         for (final String name : names) {
             if (DEBUG)
