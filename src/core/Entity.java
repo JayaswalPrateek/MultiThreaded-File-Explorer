@@ -92,11 +92,10 @@ interface Entity extends Runnable {
     ErrorCode create(final String... names);
 
     default ErrorCode delete(final String destination, final String... names) { // for files and empty directories
-        if (CriticalSectionHandler.isLocked(names))
-            return ErrorCode.ENTITY_IS_LOCKED;
         for (final String name : names)
             if ((getPath() + getName()).startsWith(destination + name))
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
+        CriticalSectionHandler.lock(names);
         for (final String name : names) {
             if (DEBUG)
                 System.out.println("DELETING " + destination + name);
@@ -110,6 +109,8 @@ interface Entity extends Runnable {
                 return ErrorCode.IO_ERROR;
             } catch (final Exception e) {
                 return ErrorCode.UNKOWN_ERROR;
+            } finally {
+                CriticalSectionHandler.unlock(names);
             }
         }
         return ErrorCode.SUCCESS;
