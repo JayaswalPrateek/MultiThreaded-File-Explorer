@@ -18,8 +18,8 @@ public interface File extends Entity {
             return ErrorCode.FILE_NOT_FOUND;
         if (CriticalSectionHandler.isLocked(path + name))
             return ErrorCode.ENTITY_IS_LOCKED;
+        CriticalSectionHandler.lock(path + name);
         try {
-            CriticalSectionHandler.lock(path + name);
             Desktop.getDesktop().open(new java.io.File(path + name));
         } catch (final IOException e) {
             return ErrorCode.IO_ERROR;
@@ -27,6 +27,15 @@ public interface File extends Entity {
             return ErrorCode.UNKOWN_ERROR;
         } finally {
             CriticalSectionHandler.unlock(path + name);
+        }
+        return ErrorCode.SUCCESS;
+    }
+
+    static ErrorCode open(final FolderImpl obj, final String... names) {
+        for (final String name : names) {
+            final ErrorCode result = open(obj, name);
+            if (result != ErrorCode.SUCCESS)
+                return result;
         }
         return ErrorCode.SUCCESS;
     }
@@ -39,8 +48,8 @@ public interface File extends Entity {
             return ErrorCode.FILE_NOT_FOUND;
         if (CriticalSectionHandler.isLocked(path + name))
             return ErrorCode.ENTITY_IS_LOCKED;
+        CriticalSectionHandler.lock(path + name);
         try {
-            CriticalSectionHandler.lock(path + name);
             final BasicFileAttributes attrs = Files.readAttributes(Paths.get(path + name), BasicFileAttributes.class);
             final java.io.File file = new java.io.File(path + name);
             System.out.println("Size: " + attrs.size());

@@ -16,23 +16,16 @@ final class FileImpl implements File {
             create(".", new String[] { name });
     }
 
-    // public FileImpl(final FileImpl obj) {
-    // this(obj.path, obj.name + "-copy");
-    // new FolderImpl(obj.getPath()).copy(".", name);
-    // }
-
     public FileImpl(final String newName, final FolderImpl obj) {
         this(obj.getPath() + obj.getName(), newName);
     }
 
     public String getPath() {
-        final String p = path;
-        return p;
+        return path;
     }
 
     public String getName() {
-        final String n = name;
-        return n;
+        return name;
     }
 
     public void setPath(final String path) {
@@ -58,7 +51,6 @@ final class FileImpl implements File {
 
     @Override
     public boolean equals(final Object obj) {
-        CriticalSectionHandler.lock(this);
         boolean result;
         if (this == obj)
             result = true;
@@ -67,7 +59,6 @@ final class FileImpl implements File {
         else {
             result = this.toString().equals(obj.toString());
         }
-        CriticalSectionHandler.unlock(this);
         return result;
     }
 
@@ -86,6 +77,9 @@ final class FileImpl implements File {
             for (final char ch : name.toCharArray())
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
+        if (CriticalSectionHandler.isLocked(names))
+            return ErrorCode.ENTITY_IS_LOCKED;
+        CriticalSectionHandler.lock(names);
         for (final String newFileName : names) {
             if (DEBUG)
                 System.out.println("CREATING " + (destination.equals(".") ? path : destination) + newFileName);
@@ -99,6 +93,8 @@ final class FileImpl implements File {
                 return ErrorCode.IO_ERROR;
             } catch (final Exception e) {
                 return ErrorCode.UNKOWN_ERROR;
+            } finally {
+                CriticalSectionHandler.unlock(names);
             }
         }
         return ErrorCode.SUCCESS;
