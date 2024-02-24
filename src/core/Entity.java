@@ -19,36 +19,37 @@ interface Entity extends Runnable {
     final static class CriticalSectionHandler {
         private static final ConcurrentHashMap<String, ReentrantLock> lockedEntities = new ConcurrentHashMap<>();
 
-        static synchronized void lock(final String... pathsAndNames) {
-            for (final String pathAndName : pathsAndNames)
-                lockedEntities.computeIfAbsent(pathAndName, k -> new ReentrantLock()).lock();
-            if (DEBUG)
-                for (final String pathAndName : pathsAndNames)
+        static void lock(final String... pathsAndNames) {
+            for (final String pathAndName : pathsAndNames) {
+                lockedEntities.computeIfAbsent(pathAndName, k -> new ReentrantLock());
+                lockedEntities.get(pathAndName).lock();
+                if (DEBUG)
                     System.out.println("LOCKED " + pathAndName);
+            }
         }
 
-        static synchronized void lock(final Entity... entities) {
+        static void lock(final Entity... entities) {
             lock(Arrays.stream(entities).map(Object::toString).toArray(String[]::new));
         }
 
-        static synchronized void unlock(final String... pathsAndNames) {
+        static void unlock(final String... pathsAndNames) {
             for (final String pathAndName : pathsAndNames) {
                 final ReentrantLock lock = lockedEntities.get(pathAndName);
                 if (lock != null && lock.isHeldByCurrentThread()) {
                     lock.unlock();
-                    lockedEntities.remove(pathAndName);
+                    if (!lock.isLocked())
+                        lockedEntities.remove(pathAndName);
+                    if (DEBUG)
+                        System.out.println("UNLOCKED " + pathAndName);
                 }
             }
-            if (DEBUG)
-                for (final String pathAndName : pathsAndNames)
-                    System.out.println("UNLOCKED " + pathAndName);
         }
 
-        static synchronized void unlock(final Entity... entities) {
+        static void unlock(final Entity... entities) {
             unlock(Arrays.stream(entities).map(Object::toString).toArray(String[]::new));
         }
 
-        static synchronized boolean isLocked(final String... pathsAndNames) {
+        static boolean isLocked(final String... pathsAndNames) {
             for (final String pathAndName : pathsAndNames) {
                 final ReentrantLock lock = lockedEntities.get(pathAndName);
                 if (!(lock != null && lock.isLocked())) {
@@ -62,7 +63,7 @@ interface Entity extends Runnable {
             return true;
         }
 
-        static synchronized boolean isLocked(final Entity... entities) {
+        static boolean isLocked(final Entity... entities) {
             return isLocked(Arrays.stream(entities).map(Object::toString).toArray(String[]::new));
         }
     }
