@@ -57,5 +57,27 @@ final class Main {
         System.out.println("now in " + workingDir.getPath() + workingDir.getName());
         System.out.println("new name is " + workingDir.getName());
         System.out.println("new path is " + workingDir.getPath());
+
+        System.out.println("Creating a folder called test");
+        System.out.println(workingDir.create(new String[] { "test" }));
+        System.out.println(workingDir.cd("test"));
+
+        System.out.println("Creating multiple folders called abc, def, ghi, jkl in test");
+        System.out.println(workingDir.create(new String[] { "abc", "def", "ghi", "jkl" }));
+
+        System.out.println("Creating file foo.txt in test");
+        System.out.println(workingDir.createNewFile("foo.txt"));
+
+        System.out.println("Creating multiple files a.txt, b.txt, c.txt in test");
+        System.out.println(workingDir.createNewFile("a.txt", "b.txt", "c.txt"));
+
+        System.out.println(core.File.open(workingDir, "foo.txt"));
+        System.out.println(core.File.properties(workingDir, "foo.txt"));
+
+        System.out.println(workingDir.delete(workingDir, "abc"));
+        System.out.println(workingDir.delete(workingDir, "ghi", "jkl"));
+
+        System.out.println(workingDir.delete(workingDir, "foo.txt"));
+        System.out.println(workingDir.delete(workingDir, "a.txt", "b.txt"));
     }
 }
