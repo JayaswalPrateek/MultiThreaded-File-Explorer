@@ -150,8 +150,8 @@ public final class FolderImpl implements Folder {
         return create(".", names);
     }
 
-    public synchronized ErrorCode createNewFile(final String... newFileNames) {
-        return new FileImpl(newFileNames[0], this).create(newFileNames);
+    public synchronized ErrorCode createNewFile(final String destination, final String... newFileNames) {
+        return new FileImpl(newFileNames[0], this).create(destination, newFileNames);
     }
 
     public ErrorCode copy(final String srcPath, final String srcName, final String destPath, final String destName) {
