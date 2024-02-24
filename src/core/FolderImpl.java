@@ -36,9 +36,8 @@ public final class FolderImpl implements Folder {
         }
     }
 
-    private static final String homeDirPath = System.getProperty("user.home");
-    private static final FolderImpl singletonObj = new FolderImpl(new Splitter(homeDirPath).getPath(),
-            new Splitter(homeDirPath).getName());
+    private static final Splitter s = new Splitter(System.getProperty("user.home"));
+    private static final FolderImpl singletonObj = new FolderImpl(s.getPath(), s.getName());
 
     public static FolderImpl getInstance() {
         return singletonObj;
@@ -89,10 +88,12 @@ public final class FolderImpl implements Folder {
 
     public boolean doesExist() {
         if (DEBUG)
-            System.out.println("CHECKING IF " + path + name + " EXISTS");
+            System.out.println("CHECKING IF " + path + name + " EXISTS: ");
         CriticalSectionHandler.lock(this);
         final boolean result = Files.exists(Path.of(path, name)) && Files.isDirectory(Path.of(path, name));
         CriticalSectionHandler.unlock(this);
+        if (DEBUG)
+            System.out.println((result ? "" : "NOT ") + "FOUND");
         return result;
     }
 
@@ -245,13 +246,14 @@ public final class FolderImpl implements Folder {
         throw new UnsupportedOperationException("Unimplemented method 'run'");
     }
 
-    public CopyOnWriteArrayList<String> listFiles() {
+    public CopyOnWriteArrayList<String> listFiles(final ListOption opt) {
         final CopyOnWriteArrayList<String> files = new CopyOnWriteArrayList<>();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name))) {
             CriticalSectionHandler.lock(this);
             for (final Path path : stream)
                 if (!Files.isDirectory(path))
-                    files.add(path.toString());
+                    if (opt == ListOption.SHOW_HIDDEN || !Files.isHidden(path))
+                        files.add(path.toString());
         } catch (final IOException | DirectoryIteratorException e) {
             if (DEBUG)
                 e.printStackTrace();
@@ -263,13 +265,18 @@ public final class FolderImpl implements Folder {
         return files;
     }
 
-    public CopyOnWriteArrayList<String> listFolders() {
+    public CopyOnWriteArrayList<String> listFiles() {
+        return listFiles(ListOption.NONE);
+    }
+
+    public CopyOnWriteArrayList<String> listFolders(final ListOption opt) {
         final CopyOnWriteArrayList<String> folders = new CopyOnWriteArrayList<>();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name),
                 Files::isDirectory)) {
             CriticalSectionHandler.lock(this);
             for (final Path path : stream)
-                folders.add(path.toString());
+                if (opt == ListOption.SHOW_HIDDEN || !Files.isHidden(path))
+                    folders.add(path.toString());
         } catch (final IOException | DirectoryIteratorException e) {
             if (DEBUG)
                 e.printStackTrace();
@@ -279,6 +286,10 @@ public final class FolderImpl implements Folder {
             CriticalSectionHandler.unlock(this);
         }
         return folders;
+    }
+
+    public CopyOnWriteArrayList<String> listFolders() {
+        return listFolders(ListOption.NONE);
     }
 
     private CopyOnWriteArrayList<String> getNameFromPathAndName(final CopyOnWriteArrayList<String> entityList) {

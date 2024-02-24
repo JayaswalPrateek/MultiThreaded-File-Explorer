@@ -3,9 +3,14 @@ package core;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 interface Folder extends Entity {
-    CopyOnWriteArrayList<String> listFiles();
+    public enum ListOption {
+        SHOW_HIDDEN,
+        NONE
+    }
 
-    CopyOnWriteArrayList<String> listFolders();
+    CopyOnWriteArrayList<String> listFiles(final ListOption opt);
+
+    CopyOnWriteArrayList<String> listFolders(final ListOption opt);
 
     CopyOnWriteArrayList<String> regexFilter(final String patternString);
 
