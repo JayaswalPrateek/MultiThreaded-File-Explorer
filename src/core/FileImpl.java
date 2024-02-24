@@ -93,6 +93,8 @@ final class FileImpl implements File {
                 Files.createFile(Paths.get((destination.equals(".") ? path : destination) + newFileName));
             } catch (final UnsupportedOperationException e) {
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
+            } catch (final java.nio.file.FileAlreadyExistsException e) {
+                // return ErrorCode.FILE_ALREADY_EXISTS; // implies we replace existing
             } catch (final IOException e) {
                 return ErrorCode.IO_ERROR;
             } catch (final Exception e) {
