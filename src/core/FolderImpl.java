@@ -11,7 +11,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class FolderImpl implements Folder {
@@ -159,10 +158,9 @@ public final class FolderImpl implements Folder {
     public ErrorCode copy(final String destination, final String... namesWithoutPaths) {
         if (CriticalSectionHandler.isLocked(this))
             return ErrorCode.ENTITY_IS_LOCKED;
-        final CopyOnWriteArrayList<String> filesList = getNameFromPathAndName(listFiles());
-        final CopyOnWriteArrayList<String> foldersList = getNameFromPathAndName(listFolders());
         for (final String name : namesWithoutPaths)
-            if (!filesList.contains(name) && !foldersList.contains(name))
+            if (!getNameFromPathAndName(listFiles()).contains(name)
+                    && !getNameFromPathAndName(listFolders()).contains(name))
                 return ErrorCode.ENTITY_NOT_FOUND;
         for (final String name : namesWithoutPaths) {
             if (DEBUG)
@@ -170,7 +168,7 @@ public final class FolderImpl implements Folder {
                         "COPYING " + getPath() + name + " TO " + (destination.equals(".") ? getPath() : destination) +
                                 name);
             try {
-                if (filesList.contains(name)) {
+                if (getNameFromPathAndName(listFiles()).contains(name)) {
                     Files.copy(Paths.get(getPath() + name), Paths.get(
                             (destination.equals(".") ? getPath() : destination) + name),
                             StandardCopyOption.REPLACE_EXISTING);
@@ -300,24 +298,15 @@ public final class FolderImpl implements Folder {
     }
 
     public CopyOnWriteArrayList<String> regexFilter(final String patternString) {
-        final CopyOnWriteArrayList<String> Files = getNameFromPathAndName(listFiles());
-        final CopyOnWriteArrayList<String> Folders = getNameFromPathAndName(listFolders());
-
         final CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
         final Pattern pattern = Pattern.compile(patternString);
         CriticalSectionHandler.lock(this);
-        for (final String candidateFile : Files) {
-            final Matcher matcher = pattern.matcher(candidateFile);
-            final boolean matchFound = matcher.matches();
-            if (matchFound)
+        for (final String candidateFile : getNameFromPathAndName(listFiles()))
+            if (pattern.matcher(candidateFile).matches())
                 Filtered.add(candidateFile);
-        }
-        for (final String candidateFolder : Folders) {
-            final Matcher matcher = pattern.matcher(candidateFolder);
-            final boolean matchFound = matcher.matches();
-            if (matchFound)
+        for (final String candidateFolder : getNameFromPathAndName(listFolders()))
+            if (pattern.matcher(candidateFolder).matches())
                 Filtered.add(candidateFolder);
-        }
         CriticalSectionHandler.unlock(this);
         return Filtered;
     }
@@ -325,8 +314,7 @@ public final class FolderImpl implements Folder {
     public ErrorCode stepIn(final String target) {
         if (DEBUG)
             System.out.println("STEPPING IN FROM PATH=" + path + " NAME=" + name + " TO " + target);
-        final CopyOnWriteArrayList<String> Folders = getNameFromPathAndName(listFolders());
-        if (!Folders.contains(target))
+        if (!getNameFromPathAndName(listFolders()).contains(target))
             return ErrorCode.DIR_NOT_FOUND;
         path += name + '/';
         name = target;
@@ -350,8 +338,7 @@ public final class FolderImpl implements Folder {
     public ErrorCode cd(final String destination) { // doesnt handle a new absolute path and ~
         if (DEBUG)
             System.out.println("CHANGE DIR TO" + destination);
-        final String[] segments = destination.split("/");
-        for (final String segment : segments)
+        for (final String segment : destination.split("/"))
             if (segment.equals("."))
                 continue;
             else if (segment.equals("..") && stepOut() == ErrorCode.DIR_NOT_FOUND)
