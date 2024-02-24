@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Objects;
 
 final class FileImpl implements File {
@@ -56,9 +57,8 @@ final class FileImpl implements File {
             result = true;
         else if (obj == null || getClass() != obj.getClass())
             result = false;
-        else {
+        else
             result = this.toString().equals(obj.toString());
-        }
         return result;
     }
 
@@ -72,14 +72,16 @@ final class FileImpl implements File {
         return getPath() + getName();
     }
 
-    public synchronized ErrorCode create(final String destination, final String... names) {
+    public ErrorCode create(final String destination, final String... names) {
         for (final String name : names)
             for (final char ch : name.toCharArray())
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
-        if (CriticalSectionHandler.isLocked(names))
+        final String[] pathsAndNames = Arrays.stream(names)
+                .map(name -> (destination.equals(".") ? path : destination) + name).toArray(String[]::new);
+        if (CriticalSectionHandler.isLocked(pathsAndNames))
             return ErrorCode.ENTITY_IS_LOCKED;
-        CriticalSectionHandler.lock(names);
+        CriticalSectionHandler.lock(pathsAndNames);
         for (final String newFileName : names) {
             if (DEBUG)
                 System.out.println("CREATING " + (destination.equals(".") ? path : destination) + newFileName);
@@ -94,13 +96,13 @@ final class FileImpl implements File {
             } catch (final Exception e) {
                 return ErrorCode.UNKOWN_ERROR;
             } finally {
-                CriticalSectionHandler.unlock(names);
+                CriticalSectionHandler.unlock(pathsAndNames);
             }
         }
         return ErrorCode.SUCCESS;
     }
 
-    public synchronized ErrorCode create(final String... names) {
+    public ErrorCode create(final String... names) {
         return create(".", names);
     }
 

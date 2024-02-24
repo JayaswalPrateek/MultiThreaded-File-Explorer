@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
@@ -60,13 +61,11 @@ public final class FolderImpl implements Folder {
     }
 
     public String getPath() {
-        final String p = path;
-        return p;
+        return path;
     }
 
     public String getName() {
-        final String n = name;
-        return n;
+        return name;
     }
 
     public void setPath(final String path) {
@@ -94,16 +93,13 @@ public final class FolderImpl implements Folder {
 
     @Override
     public boolean equals(final Object obj) {
-        CriticalSectionHandler.lock(this);
         boolean result;
         if (this == obj)
             result = true;
         else if (obj == null || getClass() != obj.getClass())
             result = false;
-        else {
+        else
             result = this.toString().equals(obj.toString());
-        }
-        CriticalSectionHandler.unlock(this);
         return result;
     }
 
@@ -122,6 +118,12 @@ public final class FolderImpl implements Folder {
             for (final char ch : name.toCharArray())
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
+        final String[] pathsAndNames = Arrays.stream(names)
+                .map(name -> (destination.equals(".") ? (path + name + '/') : destination) + name)
+                .toArray(String[]::new);
+        if (CriticalSectionHandler.isLocked(pathsAndNames))
+            return ErrorCode.ENTITY_IS_LOCKED;
+        CriticalSectionHandler.lock(pathsAndNames);
         for (final String newFolderName : names) {
             if (DEBUG)
                 System.out.println(
@@ -137,6 +139,8 @@ public final class FolderImpl implements Folder {
                 return ErrorCode.IO_ERROR;
             } catch (final Exception e) {
                 return ErrorCode.UNKOWN_ERROR;
+            } finally {
+                CriticalSectionHandler.unlock(pathsAndNames);
             }
         }
         return ErrorCode.SUCCESS;
