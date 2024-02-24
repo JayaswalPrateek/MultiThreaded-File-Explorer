@@ -3,6 +3,17 @@ package core;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 interface Folder extends Entity {
+    ErrorCode createNewFile(final String destination, final String... newFileName);
+
+    ErrorCode copy(final String srcPath, final String srcName, final String destPath, final String destName);
+
+    ErrorCode copy(final String destination, final String... names);
+
+    ErrorCode move(final String srcPath, final String srcName, final String destPath, final String destName);
+
+    ErrorCode move(final String destination, final String... names);
+
+    ErrorCode rename(final String oldName, final String newName);
 
     CopyOnWriteArrayList<String> listFiles(final ListOption opt);
 
@@ -15,8 +26,6 @@ interface Folder extends Entity {
     CopyOnWriteArrayList<String> regexFilter(final String patternString, final ListOption opt);
 
     CopyOnWriteArrayList<String> regexFilter(final String patternString);
-
-    ErrorCode createNewFile(final String destination, final String... newFileName);
 
     ErrorCode stepIn(final String target);
 
