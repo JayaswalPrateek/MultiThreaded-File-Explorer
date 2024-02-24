@@ -53,10 +53,10 @@ final class Main {
         System.out.println("new name is " + workingDir.getName());
         System.out.println("new path is " + workingDir.getPath());
 
-        System.out.println(workingDir.cd("./Downloads"));
-        System.out.println("now in " + workingDir.getPath() + workingDir.getName());
-        System.out.println("new name is " + workingDir.getName());
-        System.out.println("new path is " + workingDir.getPath());
+        // System.out.println(workingDir.cd("./Downloads"));
+        // System.out.println("now in " + workingDir.getPath() + workingDir.getName());
+        // System.out.println("new name is " + workingDir.getName());
+        // System.out.println("new path is " + workingDir.getPath());
 
         System.out.println("Creating a folder called test");
         System.out.println(workingDir.create(new String[] { "test" }));
@@ -79,5 +79,11 @@ final class Main {
 
         System.out.println(workingDir.delete(workingDir, "foo.txt"));
         System.out.println(workingDir.delete(workingDir, "a.txt", "b.txt"));
+
+        System.out.println(workingDir.move(".", "a.txt", ".", "haha.txt"));
+        System.out.println(workingDir.move(".", "a.txt", "abc/", "haha.txt"));
+        System.out.println(workingDir.move(".", "ghi/", "abc/", "ihj"));
+        System.out.println(workingDir.move("abc/", new String[] { "a.txt", "b.txt", "c.txt" }));
+        System.out.println(workingDir.rename("foo.txt", "bar.txt"));
     }
 }
