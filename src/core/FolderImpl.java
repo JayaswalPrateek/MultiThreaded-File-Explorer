@@ -113,7 +113,7 @@ public final class FolderImpl implements Folder {
         return getPath() + getName();
     }
 
-    public synchronized ErrorCode create(final String destination, final String... names) {
+    public ErrorCode create(final String destination, final String... names) {
         for (final String name : names)
             for (final char ch : name.toCharArray())
                 if (ILLEGAL_CHARACTERS.contains(ch))
@@ -146,11 +146,11 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    public synchronized ErrorCode create(final String... names) {
+    public ErrorCode create(final String... names) {
         return create(".", names);
     }
 
-    public synchronized ErrorCode createNewFile(final String destination, final String... newFileNames) {
+    public ErrorCode createNewFile(final String destination, final String... newFileNames) {
         return new FileImpl(newFileNames[0], this).create(destination, newFileNames);
     }
 
@@ -309,14 +309,12 @@ public final class FolderImpl implements Folder {
     public CopyOnWriteArrayList<String> regexFilter(final String patternString, final ListOption opt) {
         final CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
         final Pattern pattern = Pattern.compile(patternString);
-        CriticalSectionHandler.lock(this);
         for (final String candidateFile : getNameFromPathAndName(listFiles(opt)))
             if (pattern.matcher(candidateFile).matches())
                 Filtered.add(candidateFile);
         for (final String candidateFolder : getNameFromPathAndName(listFolders(opt)))
             if (pattern.matcher(candidateFolder).matches())
                 Filtered.add(candidateFolder);
-        CriticalSectionHandler.unlock(this);
         return Filtered;
     }
 
@@ -329,8 +327,8 @@ public final class FolderImpl implements Folder {
             System.out.println("STEPPING IN FROM PATH=" + path + " NAME=" + name + " TO " + target);
         if (!getNameFromPathAndName(listFolders()).contains(target))
             return ErrorCode.DIR_NOT_FOUND;
-        path += name + '/';
-        name = target;
+        setPath(getPath() + getName() + '/');
+        setName(target);
         return ErrorCode.SUCCESS;
     }
 
@@ -341,8 +339,8 @@ public final class FolderImpl implements Folder {
             return ErrorCode.DIR_NOT_FOUND;
         final int lastSlash = path.lastIndexOf('/');
         final int secondLastIndex = path.lastIndexOf('/', lastSlash - 1);
-        name = path.substring(1 + secondLastIndex, lastSlash);
-        path = path.substring(0, secondLastIndex + 1);
+        setName(path.substring(1 + secondLastIndex, lastSlash));
+        setPath(path.substring(0, secondLastIndex + 1));
         if (DEBUG)
             System.out.println(" TO PATH=" + path + " NAME=" + name);
         return ErrorCode.SUCCESS;
