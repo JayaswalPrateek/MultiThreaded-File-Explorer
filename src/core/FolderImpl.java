@@ -207,16 +207,20 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    private ErrorCode move(final String sourceName, final String targetName) {
+    public ErrorCode move(final String srcPath, final String srcName, final String destPath, final String destName) {
         if (CriticalSectionHandler.isLocked(this))
             return ErrorCode.ENTITY_IS_LOCKED;
-        if (!getNameFromPathAndName(listFiles()).contains(sourceName) &&
-                !getNameFromPathAndName(listFolders()).contains(sourceName))
+        final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
+                + (srcName.equals(".") ? "" : srcName);
+        final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
+                + (destName.equals(".") ? "" : destName);
+
+        if (!Files.exists(Paths.get(srcFileLocation)))
             return ErrorCode.ENTITY_NOT_FOUND;
         if (DEBUG)
-            System.out.println("MOVING " + getPath() + sourceName + " TO " + getPath() + targetName);
+            System.out.println("MOVING " + srcFileLocation + " TO " + destFileLocation);
         try {
-            Files.move(Path.of(getPath() + sourceName), Path.of(getPath() + targetName),
+            Files.move(Path.of(srcFileLocation), Path.of(destFileLocation),
                     StandardCopyOption.REPLACE_EXISTING);
         } catch (UnsupportedOperationException e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
@@ -228,17 +232,17 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    ErrorCode move(final String destination, final String... names) {
+    public ErrorCode move(final String destination, final String... names) {
         for (final String name : names) {
-            final ErrorCode result = move(destination, name);
+            final ErrorCode result = move(".", name, destination, name);
             if (result != ErrorCode.SUCCESS)
                 return result;
         }
         return ErrorCode.SUCCESS;
     }
 
-    ErrorCode rename(final String oldName, final String newName) {
-        return move(oldName, newName);
+    public ErrorCode rename(final String oldName, final String newName) {
+        return move(".", oldName, ".", newName);
     }
 
     public void run() {
