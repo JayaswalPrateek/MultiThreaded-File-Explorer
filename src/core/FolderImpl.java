@@ -55,11 +55,6 @@ public final class FolderImpl implements Folder {
                 pathWithName.substring(pathWithName.lastIndexOf('/' + 1)));
     }
 
-    private FolderImpl(final FolderImpl obj) {
-        this(obj.path, obj.name + "-copy");
-        copy(".", name);
-    }
-
     private FolderImpl(final String newName, final FolderImpl obj) {
         this(obj.getPath() + obj.getName(), newName);
     }
@@ -155,54 +150,60 @@ public final class FolderImpl implements Folder {
         return new FileImpl(newFileNames[0], this).create(newFileNames);
     }
 
-    public ErrorCode copy(final String destination, final String... namesWithoutPaths) {
+    public ErrorCode copy(final String srcPath, final String srcName, final String destPath, final String destName) {
         if (CriticalSectionHandler.isLocked(this))
             return ErrorCode.ENTITY_IS_LOCKED;
-        for (final String name : namesWithoutPaths)
-            if (!getNameFromPathAndName(listFiles()).contains(name)
-                    && !getNameFromPathAndName(listFolders()).contains(name))
-                return ErrorCode.ENTITY_NOT_FOUND;
-        for (final String name : namesWithoutPaths) {
-            if (DEBUG)
-                System.out.println(
-                        "COPYING " + getPath() + name + " TO " + (destination.equals(".") ? getPath() : destination) +
-                                name);
-            try {
-                if (getNameFromPathAndName(listFiles()).contains(name)) {
-                    Files.copy(Paths.get(getPath() + name), Paths.get(
-                            (destination.equals(".") ? getPath() : destination) + name),
-                            StandardCopyOption.REPLACE_EXISTING);
-                } else {
-                    final Path sourcePath = Paths.get(getPath() + name);
-                    final Path targetPath = Paths.get((destination.equals(".") ? getPath() : destination) + name);
-                    Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
-                        @Override
-                        public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
-                                throws IOException {
-                            final Path targetDirPath = targetPath.resolve(sourcePath.relativize(dir));
-                            if (!Files.exists(targetDirPath))
-                                Files.createDirectories(targetDirPath);
-                            return FileVisitResult.CONTINUE;
-                        }
+        final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
+                + (srcName.equals(".") ? "" : srcName);
+        final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
+                + (destName.equals(".") ? "" : destName);
+        if (!Files.exists(Paths.get(srcFileLocation)))
+            return ErrorCode.ENTITY_NOT_FOUND;
+        if (DEBUG)
+            System.out.println("COPYING " + srcFileLocation + " TO " + destFileLocation);
+        try {
+            if (Files.isRegularFile(Paths.get(srcFileLocation))) {
+                Files.copy(Paths.get(srcFileLocation), Paths.get(destFileLocation),
+                        StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                final Path sourcePath = Paths.get(srcFileLocation);
+                final Path targetPath = Paths.get(destFileLocation);
+                Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
+                            throws IOException {
+                        final Path targetDirPath = targetPath.resolve(sourcePath.relativize(dir));
+                        if (!Files.exists(targetDirPath))
+                            Files.createDirectories(targetDirPath);
+                        return FileVisitResult.CONTINUE;
+                    }
 
-                        @Override
-                        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs)
-                                throws IOException {
-                            Files.copy(file, targetPath.resolve(sourcePath.relativize(file)),
-                                    StandardCopyOption.REPLACE_EXISTING);
-                            return FileVisitResult.CONTINUE;
-                        }
-                    });
-                }
-            } catch (final UnsupportedOperationException e) {
-                return ErrorCode.OPERATION_NOT_SUPPORTED;
-            } catch (final java.nio.file.FileAlreadyExistsException e) {
-                return ErrorCode.FILE_ALREADY_EXISTS;
-            } catch (final IOException e) {
-                e.printStackTrace();
-            } catch (final Exception e) {
-                return ErrorCode.UNKOWN_ERROR;
+                    @Override
+                    public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs)
+                            throws IOException {
+                        Files.copy(file, targetPath.resolve(sourcePath.relativize(file)),
+                                StandardCopyOption.REPLACE_EXISTING);
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
             }
+        } catch (final UnsupportedOperationException e) {
+            return ErrorCode.OPERATION_NOT_SUPPORTED;
+        } catch (final java.nio.file.FileAlreadyExistsException e) {
+            return ErrorCode.FILE_ALREADY_EXISTS;
+        } catch (final IOException e) {
+            e.printStackTrace();
+        } catch (final Exception e) {
+            return ErrorCode.UNKOWN_ERROR;
+        }
+        return ErrorCode.SUCCESS;
+    }
+
+    public ErrorCode copy(final String destination, final String... names) {
+        for (final String name : names) {
+            final ErrorCode result = copy(".", name, destination, name);
+            if (result != ErrorCode.SUCCESS)
+                return result;
         }
         return ErrorCode.SUCCESS;
     }
