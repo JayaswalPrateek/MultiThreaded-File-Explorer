@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
@@ -112,6 +113,11 @@ public final class FolderImpl implements Folder {
         }
         CriticalSectionHandler.unlock(this);
         return result;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, name);
     }
 
     @Override

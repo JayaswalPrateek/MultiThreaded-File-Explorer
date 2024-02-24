@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 final class FileImpl implements File {
     private volatile String path, name;
@@ -72,6 +73,11 @@ final class FileImpl implements File {
         }
         CriticalSectionHandler.unlock(this);
         return result;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, name);
     }
 
     @Override

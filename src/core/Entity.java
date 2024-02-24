@@ -71,6 +71,9 @@ interface Entity extends Runnable {
     boolean equals(final Object obj);
 
     @Override
+    int hashCode();
+
+    @Override
     String toString();
 
     String getPath();
