@@ -122,7 +122,7 @@ public final class FolderImpl implements Folder {
         return resultString;
     }
 
-    public ErrorCode create(final String destination, final String... names) {
+    public synchronized ErrorCode create(final String destination, final String... names) {
         for (final String name : names)
             for (final char ch : name.toCharArray())
                 if (ILLEGAL_CHARACTERS.contains(ch))
@@ -147,11 +147,11 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    public ErrorCode create(final String... names) {
+    public synchronized ErrorCode create(final String... names) {
         return create(".", names);
     }
 
-    public ErrorCode createNewFile(final String newFileName) {
+    public synchronized ErrorCode createNewFile(final String newFileName) {
         return new FileImpl(newFileName, this).create(new String[] { newFileName });
     }
 
