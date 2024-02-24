@@ -7,8 +7,9 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.awt.Desktop;
 
-interface File extends Entity {
-    static ErrorCode open(final String path, final String name) {
+public interface File extends Entity {
+    static ErrorCode open(final FolderImpl obj, final String name) {
+        final String path = obj.getPath() + obj.getName() + '/';
         if (DEBUG)
             System.out.println("OPENING " + path + name);
         if (!Desktop.isDesktopSupported())
@@ -30,9 +31,12 @@ interface File extends Entity {
         return ErrorCode.SUCCESS;
     }
 
-    static ErrorCode properties(final String path, final String name) {
+    static ErrorCode properties(final FolderImpl obj, final String name) {
+        final String path = obj.getPath() + obj.getName() + '/';
         if (DEBUG)
             System.out.println("PROPERTIES OF " + path + name);
+        if (!Files.exists(Path.of(path, name)))
+            return ErrorCode.FILE_NOT_FOUND;
         if (CriticalSectionHandler.isLocked(path + name))
             return ErrorCode.ENTITY_IS_LOCKED;
         try {
