@@ -26,16 +26,12 @@ final class FileImpl implements File {
     }
 
     public String getPath() {
-        CriticalSectionHandler.lock(this);
         final String p = path;
-        CriticalSectionHandler.unlock(this);
         return p;
     }
 
     public String getName() {
-        CriticalSectionHandler.lock(this);
         final String n = name;
-        CriticalSectionHandler.unlock(this);
         return n;
     }
 
@@ -82,10 +78,7 @@ final class FileImpl implements File {
 
     @Override
     public String toString() {
-        CriticalSectionHandler.lock(this);
-        final String resultString = getPath() + getName();
-        CriticalSectionHandler.unlock(this);
-        return resultString;
+        return getPath() + getName();
     }
 
     public synchronized ErrorCode create(final String destination, final String... names) {
