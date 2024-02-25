@@ -53,10 +53,10 @@ final class Main {
         System.out.println("new name is " + workingDir.getName());
         System.out.println("new path is " + workingDir.getPath());
 
-        // System.out.println(workingDir.cd("./Downloads"));
-        // System.out.println("now in " + workingDir.getPath() + workingDir.getName());
-        // System.out.println("new name is " + workingDir.getName());
-        // System.out.println("new path is " + workingDir.getPath());
+        System.out.println(workingDir.cd("./Downloads"));
+        System.out.println("now in " + workingDir.getPath() + workingDir.getName());
+        System.out.println("new name is " + workingDir.getName());
+        System.out.println("new path is " + workingDir.getPath());
 
         System.out.println("Creating a folder called test");
         System.out.println(workingDir.create(new String[] { "test" }));
@@ -71,26 +71,27 @@ final class Main {
         System.out.println("Creating multiple files a.txt, b.txt, c.txt in test");
         System.out.println(workingDir.createNewFile("a.txt", "b.txt", "c.txt"));
 
-        // System.out.println(core.File.open(workingDir, "foo.txt"));
-        // System.out.println(core.File.properties(workingDir, "foo.txt"));
+        System.out.println(File.open("foo.txt"));
+        System.out.println(File.properties("foo.txt"));
 
-        // System.out.println(workingDir.delete(workingDir, "abc"));
-        // System.out.println(workingDir.delete(workingDir, "ghi", "jkl"));
+        System.out.println(workingDir.delete("abc"));
+        System.out.println(workingDir.delete("ghi", "jkl"));
 
-        // System.out.println(workingDir.delete(workingDir, "foo.txt"));
-        // System.out.println(workingDir.delete(workingDir, "a.txt", "b.txt"));
+        System.out.println(workingDir.delete("foo.txt"));
+        System.out.println(workingDir.delete("a.txt", "b.txt"));
 
-        // System.out.println(workingDir.move(".", "a.txt", ".", "haha.txt"));
-        // System.out.println(workingDir.move(".", "a.txt", "abc/", "haha.txt"));
-        // System.out.println(workingDir.move(".", "ghi/", "abc/", "ihj"));
-        // System.out.println(workingDir.move("abc/", new String[] { "a.txt",
-        // "b.txt","c.txt" }));
-        // System.out.println(workingDir.rename("foo.txt", "bar.txt"));
+        System.out.println(workingDir.move(".", "a.txt", ".", "haha.txt"));
+        System.out.println(workingDir.move(".", "a.txt", "abc/", "haha.txt"));
+        System.out.println(workingDir.move(".", "ghi/", "abc/", "ihj"));
+        System.out.println(workingDir.move("abc/", new String[] { "a.txt",
+                "b.txt", "c.txt" }));
 
-        // System.out.println(workingDir.copy(".", "a.txt", ".", "haha.txt"));
-        // System.out.println(workingDir.copy(".", "a.txt", "abc/", "haha.txt"));
-        // System.out.println(workingDir.copy("abc/", new String[] { "a.txt", "b.txt",
-        // "c.txt" }));
-        // System.out.println(workingDir.copy(".", "abc/", "def/", "newABC/"));
+        System.out.println(workingDir.rename("foo.txt", "bar.txt"));
+
+        System.out.println(workingDir.copy(".", "a.txt", ".", "haha.txt"));
+        System.out.println(workingDir.copy(".", "a.txt", "abc/", "haha.txt"));
+        System.out.println(workingDir.copy("abc/", new String[] { "a.txt", "b.txt",
+                "c.txt" }));
+        System.out.println(workingDir.copy(".", "abc/", "def/", "newABC/"));
     }
 }
