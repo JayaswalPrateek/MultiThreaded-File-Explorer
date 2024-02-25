@@ -1,6 +1,7 @@
 package core;
 
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
 
 interface Folder extends Entity {
     ErrorCode createNewFile(final String destination, final String... newFileName);
@@ -11,11 +12,11 @@ interface Folder extends Entity {
 
     ErrorCode copy(final String destination, final String... names);
 
-    ErrorCode move(final String srcPath, final String srcName, final String destPath, final String destName);
+    Future<ErrorCode> move(final String srcPath, final String srcName, final String destPath, final String destName);
 
-    ErrorCode move(final String destination, final String... names);
+    Future<ErrorCode> move(final String destination, final String... names);
 
-    ErrorCode rename(final String oldName, final String newName);
+    Future<ErrorCode> rename(final String oldName, final String newName);
 
     CopyOnWriteArrayList<String> listFiles(final ListOption opt);
 

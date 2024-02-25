@@ -10,10 +10,19 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
+
+import core.Entity.CriticalSectionHandler;
 
 public final class FolderImpl implements Folder {
     private volatile String path, name;
@@ -41,6 +50,8 @@ public final class FolderImpl implements Folder {
 
     private static final String homeDir = System.getProperty("user.home");
     private static final FolderImpl singletonObj = new FolderImpl(Parser.getPath(homeDir), Parser.getName(homeDir));
+    private final ExecutorService executorService = Executors
+            .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public static FolderImpl getInstance() {
         return singletonObj;
@@ -216,7 +227,8 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    public ErrorCode move(final String srcPath, final String srcName, final String destPath, final String destName) {
+    private ErrorCode nonAsyncMove(final String srcPath, final String srcName, final String destPath,
+            final String destName) {
         final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
                 + srcName;
         final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
@@ -242,16 +254,39 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    public ErrorCode move(final String destination, final String... names) {
-        for (final String name : names) {
-            final ErrorCode result = move(".", name, destination, name);
-            if (result != ErrorCode.SUCCESS)
-                return result;
-        }
-        return ErrorCode.SUCCESS;
+    public Future<ErrorCode> move(final String srcPath, final String srcName, final String destPath,
+            final String destName) {
+        final Callable<ErrorCode> moveTask = () -> {
+            return nonAsyncMove(srcPath, srcName, destPath, destName);
+        };
+        return executorService.submit(moveTask);
     }
 
-    public ErrorCode rename(final String oldName, final String newName) {
+    public Future<ErrorCode> move(final String destination, final String... names) {
+        final List<Future<ErrorCode>> futures = new ArrayList<>();
+
+        for (final String name : names) {
+            final Future<ErrorCode> future = executorService.submit(() -> {
+                return nonAsyncMove(".", name, destination, name);
+            });
+            futures.add(future);
+        }
+
+        return executorService.submit(() -> {
+            for (final Future<ErrorCode> future : futures) {
+                try {
+                    final ErrorCode errorCode = future.get();
+                    if (errorCode != ErrorCode.SUCCESS)
+                        return errorCode;
+                } catch (InterruptedException | ExecutionException e) {
+                    return ErrorCode.UNKOWN_ERROR;
+                }
+            }
+            return ErrorCode.SUCCESS;
+        });
+    }
+
+    public Future<ErrorCode> rename(final String oldName, final String newName) {
         return move(".", oldName, ".", newName);
     }
 
