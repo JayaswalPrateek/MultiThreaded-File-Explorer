@@ -8,9 +8,9 @@ interface Folder extends Entity {
 
     public ErrorCode createNewFile(final String... newFileNames);
 
-    ErrorCode copy(final String srcPath, final String srcName, final String destPath, final String destName);
+    Future<ErrorCode> copy(final String srcPath, final String srcName, final String destPath, final String destName);
 
-    ErrorCode copy(final String destination, final String... names);
+    Future<ErrorCode> copy(final String destination, final String... names);
 
     Future<ErrorCode> move(final String srcPath, final String srcName, final String destPath, final String destName);
 

@@ -166,7 +166,8 @@ public final class FolderImpl implements Folder {
         return createNewFile(".", newFileNames);
     }
 
-    public ErrorCode copy(final String srcPath, final String srcName, final String destPath, final String destName) {
+    public ErrorCode nonAsyncCopy(final String srcPath, final String srcName, final String destPath,
+            final String destName) {
         final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
                 + srcName;
         final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
@@ -218,13 +219,31 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    public ErrorCode copy(final String destination, final String... names) {
+    public Future<ErrorCode> Copy(final String srcPath, final String srcName, final String destPath,
+            final String destName) {
+        final Callable<ErrorCode> copyTask = () -> nonAsyncCopy(srcPath, srcName, destPath, destName);
+        return executorService.submit(copyTask);
+
+    }
+
+    public Future<ErrorCode> copy(final String destination, final String... names) {
+        final List<Future<ErrorCode>> futures = new ArrayList<>();
         for (final String name : names) {
-            final ErrorCode result = copy(".", name, destination, name);
-            if (result != ErrorCode.SUCCESS)
-                return result;
+            final Future<ErrorCode> future = executorService.submit(() -> nonAsyncCopy(".", name, destination, name));
+            futures.add(future);
         }
-        return ErrorCode.SUCCESS;
+
+        return executorService.submit(() -> {
+            for (final Future<ErrorCode> future : futures)
+                try {
+                    ErrorCode errorCode = future.get();
+                    if (errorCode != ErrorCode.SUCCESS)
+                        return errorCode;
+                } catch (InterruptedException | ExecutionException e) {
+                    return ErrorCode.UNKOWN_ERROR;
+                }
+            return ErrorCode.SUCCESS;
+        });
     }
 
     private ErrorCode nonAsyncMove(final String srcPath, final String srcName, final String destPath,
