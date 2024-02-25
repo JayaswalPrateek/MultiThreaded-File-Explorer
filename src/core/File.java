@@ -32,6 +32,10 @@ public interface File extends Entity {
     }
 
     static ErrorCode open(final String... names) {
+        final String path = FolderImpl.getInstance().getPath() + FolderImpl.getInstance().getName() + '/';
+        for (final String name : names)
+            if (!Files.exists(Path.of(path, name)))
+                return ErrorCode.FILE_NOT_FOUND;
         for (final String name : names) {
             final ErrorCode result = open(name);
             if (result != ErrorCode.SUCCESS)

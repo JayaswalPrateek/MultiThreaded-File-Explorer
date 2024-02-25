@@ -103,7 +103,7 @@ final class FileImpl implements File {
             } catch (final Exception e) {
                 return ErrorCode.UNKOWN_ERROR;
             } finally {
-                CriticalSectionHandler.unlock(newFileNameWithPath);
+                CriticalSectionHandler.unlock(pathsAndNames);
             }
         }
         return ErrorCode.SUCCESS;

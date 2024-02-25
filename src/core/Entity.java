@@ -19,30 +19,41 @@ interface Entity {
     final static class CriticalSectionHandler {
         private static final ConcurrentHashMap<String, ReentrantLock> lockedEntities = new ConcurrentHashMap<>();
 
-        static void lock(final String... pathsAndNames) {
+        private static synchronized boolean checkLockingConflicts(final String path) {
+            for (final String lockedPath : lockedEntities.keySet())
+                if (path.startsWith(lockedPath) || lockedPath.startsWith(path))
+                    return true;
+            return false;
+        }
+
+        static synchronized void lock(final String... pathsAndNames) {
             for (final String pathAndName : pathsAndNames) {
-                lockedEntities.computeIfAbsent(pathAndName, k -> new ReentrantLock());
                 if (DEBUG)
                     System.out.println("TRYING TO LOCK " + pathAndName);
-                lockedEntities.get(pathAndName).lock();
+                while (checkLockingConflicts(pathAndName))
+                    try {
+                        lockedEntities.wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                lockedEntities.computeIfAbsent(pathAndName, k -> new ReentrantLock()).lock();
                 if (DEBUG)
                     System.out.println("LOCKED " + pathAndName);
             }
         }
 
-        static void lock(final Entity... entities) {
+        static synchronized void lock(final Entity... entities) {
             lock(Arrays.stream(entities).map(Object::toString).toArray(String[]::new));
         }
 
-        static void unlock(final String... pathsAndNames) {
+        static synchronized void unlock(final String... pathsAndNames) {
             for (final String pathAndName : pathsAndNames) {
                 final ReentrantLock lock = lockedEntities.get(pathAndName);
                 if (lock != null && lock.isHeldByCurrentThread()) {
                     if (DEBUG)
                         System.out.println("TRYING TO UNLOCK " + pathAndName);
                     lock.unlock();
-                    if (!lock.isLocked())
-                        lockedEntities.remove(pathAndName);
+                    lockedEntities.notifyAll();
                     if (DEBUG)
                         System.out.println("UNLOCKED " + pathAndName);
                 } else if (DEBUG)
@@ -50,11 +61,11 @@ interface Entity {
             }
         }
 
-        static void unlock(final Entity... entities) {
+        static synchronized void unlock(final Entity... entities) {
             unlock(Arrays.stream(entities).map(Object::toString).toArray(String[]::new));
         }
 
-        static boolean isLocked(final String... pathsAndNames) {
+        static synchronized boolean isLocked(final String... pathsAndNames) {
             for (final String pathAndName : pathsAndNames) {
                 final ReentrantLock lock = lockedEntities.get(pathAndName);
                 if (!(lock != null && lock.isLocked())) {
@@ -68,7 +79,7 @@ interface Entity {
             return true;
         }
 
-        static boolean isLocked(final Entity... entities) {
+        static synchronized boolean isLocked(final Entity... entities) {
             return isLocked(Arrays.stream(entities).map(Object::toString).toArray(String[]::new));
         }
     }
@@ -100,6 +111,8 @@ interface Entity {
         for (final String name : names)
             if ((getPath() + getName()).startsWith(destination + name))
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
+            else if (!Files.exists(Paths.get(destination, name)))
+                return ErrorCode.ENTITY_NOT_FOUND;
         final String[] pathsAndNames = Arrays.stream(names).map(name -> destination + name).toArray(String[]::new);
         if (CriticalSectionHandler.isLocked(pathsAndNames))
             return ErrorCode.ENTITY_IS_LOCKED;
@@ -118,7 +131,7 @@ interface Entity {
             } catch (final Exception e) {
                 return ErrorCode.UNKOWN_ERROR;
             } finally {
-                CriticalSectionHandler.unlock(pathWithName);
+                CriticalSectionHandler.unlock(pathsAndNames);
             }
         }
         return ErrorCode.SUCCESS;

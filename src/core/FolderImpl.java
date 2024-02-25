@@ -18,16 +18,7 @@ import java.util.regex.Pattern;
 public final class FolderImpl implements Folder {
     private volatile String path, name;
 
-    private static final class Splitter {
-        private final String path, name;
-
-        Splitter(final String pathWithName) {
-            path = pathWithName.substring(0, 1 + pathWithName.lastIndexOf('/'));
-            name = pathWithName.substring(1 + pathWithName.lastIndexOf('/'));
-            if (DEBUG)
-                System.out.println("Splitting " + pathWithName + " into " + path + " and " + name);
-        }
-
+    private static final class Parser {
         static CopyOnWriteArrayList<String> getNameFromPathAndName(final CopyOnWriteArrayList<String> entityList) {
             for (int i = 0; i < entityList.size(); i++) {
                 final String fullPath = entityList.get(i);
@@ -39,17 +30,17 @@ public final class FolderImpl implements Folder {
             return entityList;
         }
 
-        String getPath() {
-            return path;
+        static String getPath(final String pathWithName) {
+            return pathWithName.substring(0, 1 + pathWithName.lastIndexOf('/'));
         }
 
-        String getName() {
-            return name;
+        static String getName(final String pathWithName) {
+            return pathWithName.substring(1 + pathWithName.lastIndexOf('/'));
         }
     }
 
-    private static final Splitter s = new Splitter(System.getProperty("user.home"));
-    private static final FolderImpl singletonObj = new FolderImpl(s.getPath(), s.getName());
+    private static final String homeDir = System.getProperty("user.home");
+    private static final FolderImpl singletonObj = new FolderImpl(Parser.getPath(homeDir), Parser.getName(homeDir));
 
     public static FolderImpl getInstance() {
         return singletonObj;
@@ -134,11 +125,9 @@ public final class FolderImpl implements Folder {
         CriticalSectionHandler.lock(pathsAndNames);
         for (final String newFolderName : pathsAndNames) {
             if (DEBUG)
-                System.out.println(
-                        "CREATING " + newFolderName);
+                System.out.println("CREATING " + newFolderName);
             try {
-                Files.createDirectories(
-                        Paths.get(newFolderName));
+                Files.createDirectories(Paths.get(newFolderName));
             } catch (final UnsupportedOperationException e) {
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
             } catch (final java.nio.file.FileAlreadyExistsException e) {
@@ -148,7 +137,7 @@ public final class FolderImpl implements Folder {
             } catch (final Exception e) {
                 return ErrorCode.UNKOWN_ERROR;
             } finally {
-                CriticalSectionHandler.unlock(newFolderName);
+                CriticalSectionHandler.unlock(pathsAndNames);
             }
         }
         return ErrorCode.SUCCESS;
@@ -163,14 +152,14 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode createNewFile(final String... newFileNames) {
-        return new FileImpl().create(".", newFileNames);
+        return createNewFile(".", newFileNames);
     }
 
     public ErrorCode copy(final String srcPath, final String srcName, final String destPath, final String destName) {
         final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
-                + (srcName.equals(".") ? "" : srcName);
+                + srcName;
         final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
-                + (destName.equals(".") ? "" : destName);
+                + destName;
         if (!Files.exists(Paths.get(srcFileLocation)))
             return ErrorCode.ENTITY_NOT_FOUND;
         if (CriticalSectionHandler.isLocked(srcFileLocation, destFileLocation))
@@ -229,9 +218,9 @@ public final class FolderImpl implements Folder {
 
     public ErrorCode move(final String srcPath, final String srcName, final String destPath, final String destName) {
         final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
-                + (srcName.equals(".") ? "" : srcName);
+                + srcName;
         final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
-                + (destName.equals(".") ? "" : destName);
+                + destName;
         if (!Files.exists(Paths.get(srcFileLocation)))
             return ErrorCode.ENTITY_NOT_FOUND;
         if (CriticalSectionHandler.isLocked(srcFileLocation, destFileLocation))
@@ -240,8 +229,7 @@ public final class FolderImpl implements Folder {
         if (DEBUG)
             System.out.println("MOVING " + srcFileLocation + " TO " + destFileLocation);
         try {
-            Files.move(Path.of(srcFileLocation), Path.of(destFileLocation),
-                    StandardCopyOption.REPLACE_EXISTING);
+            Files.move(Path.of(srcFileLocation), Path.of(destFileLocation), StandardCopyOption.REPLACE_EXISTING);
         } catch (UnsupportedOperationException e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
         } catch (IOException e) {
@@ -310,10 +298,10 @@ public final class FolderImpl implements Folder {
     public CopyOnWriteArrayList<String> regexFilter(final String patternString, final ListOption opt) {
         final CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
         final Pattern pattern = Pattern.compile(patternString);
-        for (final String candidateFile : Splitter.getNameFromPathAndName(listFiles(opt)))
+        for (final String candidateFile : Parser.getNameFromPathAndName(listFiles(opt)))
             if (pattern.matcher(candidateFile).matches())
                 Filtered.add(candidateFile);
-        for (final String candidateFolder : Splitter.getNameFromPathAndName(listFolders(opt)))
+        for (final String candidateFolder : Parser.getNameFromPathAndName(listFolders(opt)))
             if (pattern.matcher(candidateFolder).matches())
                 Filtered.add(candidateFolder);
         return Filtered;
@@ -326,7 +314,7 @@ public final class FolderImpl implements Folder {
     public ErrorCode stepIn(final String target) {
         if (DEBUG)
             System.out.println("STEPPING IN FROM PATH=" + path + " NAME=" + name + " TO " + target);
-        if (!Splitter.getNameFromPathAndName(listFolders()).contains(target))
+        if (!Parser.getNameFromPathAndName(listFolders()).contains(target))
             return ErrorCode.DIR_NOT_FOUND;
         setPath(getPath() + getName() + '/');
         setName(target);
