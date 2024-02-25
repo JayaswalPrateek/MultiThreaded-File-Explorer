@@ -8,8 +8,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.awt.Desktop;
 
 public interface File extends Entity {
-    static ErrorCode open(final FolderImpl obj, final String name) {
-        final String path = obj.getPath() + obj.getName() + '/';
+    static ErrorCode open(final String name) {
+        final String path = FolderImpl.getInstance().getPath() + FolderImpl.getInstance().getName() + '/';
         if (DEBUG)
             System.out.println("OPENING " + path + name);
         if (!Desktop.isDesktopSupported())
@@ -31,17 +31,17 @@ public interface File extends Entity {
         return ErrorCode.SUCCESS;
     }
 
-    static ErrorCode open(final FolderImpl obj, final String... names) {
+    static ErrorCode open(final String... names) {
         for (final String name : names) {
-            final ErrorCode result = open(obj, name);
+            final ErrorCode result = open(name);
             if (result != ErrorCode.SUCCESS)
                 return result;
         }
         return ErrorCode.SUCCESS;
     }
 
-    static ErrorCode properties(final FolderImpl obj, final String name) {
-        final String path = obj.getPath() + obj.getName() + '/';
+    static ErrorCode properties(final String name) {
+        final String path = FolderImpl.getInstance().getPath() + FolderImpl.getInstance().getName() + '/';
         if (DEBUG)
             System.out.println("PROPERTIES OF " + path + name);
         if (!Files.exists(Path.of(path, name)))

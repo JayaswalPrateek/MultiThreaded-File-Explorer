@@ -23,7 +23,7 @@ public enum ErrorCode {
     }
 
     @Override
-    public String toString() {
+    final public String toString() {
         return message;
     }
 

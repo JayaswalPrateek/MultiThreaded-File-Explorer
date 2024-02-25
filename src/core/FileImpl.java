@@ -1,23 +1,26 @@
 package core;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Objects;
+import java.util.Arrays;
+import java.io.IOException;
+import java.nio.file.Paths;
 
 final class FileImpl implements File {
     private volatile String path, name;
 
-    public FileImpl(final String path, final String name) {
+    FileImpl() { // only used by FolderImpl to call default methods of Folder Interface
+    }
+
+    FileImpl(final String path, final String name) {
         this.path = path.endsWith("/") ? path : (path + '/');
         this.name = name;
         if (!doesExist())
             create(".", new String[] { name });
     }
 
-    public FileImpl(final String newName, final FolderImpl obj) {
+    FileImpl(final String newName, final FolderImpl obj) {
         this(obj.getPath() + obj.getName(), newName);
     }
 
@@ -77,16 +80,20 @@ final class FileImpl implements File {
             for (final char ch : name.toCharArray())
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
+        final String path = FolderImpl.getInstance().getPath() + FolderImpl.getInstance().getName() + '/';
         final String[] pathsAndNames = Arrays.stream(names)
-                .map(name -> (destination.equals(".") ? path : destination) + name).toArray(String[]::new);
+                .map(name -> path + (destination.equals(".") ? "" : destination) + name).toArray(String[]::new);
         if (CriticalSectionHandler.isLocked(pathsAndNames))
             return ErrorCode.ENTITY_IS_LOCKED;
         CriticalSectionHandler.lock(pathsAndNames);
-        for (final String newFileName : names) {
+        if (!(!destination.equals(".")
+                && Files.exists(Paths.get(path + destination)) && Files.isDirectory(Paths.get(path + destination))))
+            return ErrorCode.DIR_NOT_FOUND;
+        for (final String newFileNameWithPath : pathsAndNames) {
             if (DEBUG)
-                System.out.println("CREATING " + (destination.equals(".") ? path : destination) + newFileName);
+                System.out.println("CREATING " + newFileNameWithPath);
             try {
-                Files.createFile(Paths.get((destination.equals(".") ? path : destination) + newFileName));
+                Files.createFile(Paths.get(newFileNameWithPath));
             } catch (final UnsupportedOperationException e) {
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
             } catch (final java.nio.file.FileAlreadyExistsException e) {
@@ -104,10 +111,5 @@ final class FileImpl implements File {
 
     public ErrorCode create(final String... names) {
         return create(".", names);
-    }
-
-    public void run() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'run'");
     }
 }

@@ -28,6 +28,17 @@ public final class FolderImpl implements Folder {
                 System.out.println("Splitting " + pathWithName + " into " + path + " and " + name);
         }
 
+        static CopyOnWriteArrayList<String> getNameFromPathAndName(final CopyOnWriteArrayList<String> entityList) {
+            for (int i = 0; i < entityList.size(); i++) {
+                final String fullPath = entityList.get(i);
+                String nameOnly = fullPath.substring(1 + fullPath.lastIndexOf('/'));
+                if (nameOnly.startsWith("."))
+                    nameOnly = nameOnly.substring(1 + nameOnly.indexOf('.'));
+                entityList.set(i, nameOnly);
+            }
+            return entityList;
+        }
+
         String getPath() {
             return path;
         }
@@ -151,7 +162,7 @@ public final class FolderImpl implements Folder {
     }
 
     public ErrorCode createNewFile(final String destination, final String... newFileNames) {
-        return new FileImpl(newFileNames[0], this).create(destination, newFileNames);
+        return new FileImpl().create(destination, newFileNames);
     }
 
     public ErrorCode copy(final String srcPath, final String srcName, final String destPath, final String destName) {
@@ -256,11 +267,6 @@ public final class FolderImpl implements Folder {
         return move(".", oldName, ".", newName);
     }
 
-    public void run() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'run'");
-    }
-
     public CopyOnWriteArrayList<String> listFiles(final ListOption opt) {
         final CopyOnWriteArrayList<String> files = new CopyOnWriteArrayList<>();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name))) {
@@ -301,24 +307,13 @@ public final class FolderImpl implements Folder {
         return listFolders(ListOption.NONE);
     }
 
-    private CopyOnWriteArrayList<String> getNameFromPathAndName(final CopyOnWriteArrayList<String> entityList) {
-        for (int i = 0; i < entityList.size(); i++) {
-            final String fullPath = entityList.get(i);
-            String nameOnly = fullPath.substring(fullPath.lastIndexOf('/') + 1);
-            if (nameOnly.startsWith("."))
-                nameOnly = nameOnly.substring(1 + nameOnly.indexOf('.'));
-            entityList.set(i, nameOnly);
-        }
-        return entityList;
-    }
-
     public CopyOnWriteArrayList<String> regexFilter(final String patternString, final ListOption opt) {
         final CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
         final Pattern pattern = Pattern.compile(patternString);
-        for (final String candidateFile : getNameFromPathAndName(listFiles(opt)))
+        for (final String candidateFile : Splitter.getNameFromPathAndName(listFiles(opt)))
             if (pattern.matcher(candidateFile).matches())
                 Filtered.add(candidateFile);
-        for (final String candidateFolder : getNameFromPathAndName(listFolders(opt)))
+        for (final String candidateFolder : Splitter.getNameFromPathAndName(listFolders(opt)))
             if (pattern.matcher(candidateFolder).matches())
                 Filtered.add(candidateFolder);
         return Filtered;
@@ -331,7 +326,7 @@ public final class FolderImpl implements Folder {
     public ErrorCode stepIn(final String target) {
         if (DEBUG)
             System.out.println("STEPPING IN FROM PATH=" + path + " NAME=" + name + " TO " + target);
-        if (!getNameFromPathAndName(listFolders()).contains(target))
+        if (!Splitter.getNameFromPathAndName(listFolders()).contains(target))
             return ErrorCode.DIR_NOT_FOUND;
         setPath(getPath() + getName() + '/');
         setName(target);

@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-interface Entity extends Runnable {
+interface Entity {
     static final boolean DEBUG = true;
     static final Set<Character> ILLEGAL_CHARACTERS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList('/', '\\', ':', '*', '?', '"', '<', '>', '|')));
@@ -22,6 +22,8 @@ interface Entity extends Runnable {
         static void lock(final String... pathsAndNames) {
             for (final String pathAndName : pathsAndNames) {
                 lockedEntities.computeIfAbsent(pathAndName, k -> new ReentrantLock());
+                if (DEBUG)
+                    System.out.println("TRYING TO LOCK " + pathAndName);
                 lockedEntities.get(pathAndName).lock();
                 if (DEBUG)
                     System.out.println("LOCKED " + pathAndName);
@@ -36,12 +38,15 @@ interface Entity extends Runnable {
             for (final String pathAndName : pathsAndNames) {
                 final ReentrantLock lock = lockedEntities.get(pathAndName);
                 if (lock != null && lock.isHeldByCurrentThread()) {
+                    if (DEBUG)
+                        System.out.println("TRYING TO UNLOCK " + pathAndName);
                     lock.unlock();
                     if (!lock.isLocked())
                         lockedEntities.remove(pathAndName);
                     if (DEBUG)
                         System.out.println("UNLOCKED " + pathAndName);
-                }
+                } else if (DEBUG)
+                    System.out.println("LOCK NOT FOUND/OWNED BY CALLER THREAD");
             }
         }
 
@@ -119,9 +124,7 @@ interface Entity extends Runnable {
         return ErrorCode.SUCCESS;
     }
 
-    default ErrorCode delete(final Entity obj, final String... names) {
-        if (obj instanceof FileImpl)
-            return delete(obj.getPath(), names);
-        return delete(obj.getPath() + obj.getName() + '/', names);
+    default ErrorCode delete(final String... names) {
+        return delete(getPath() + getName() + '/', names);
     }
 }
