@@ -1,6 +1,8 @@
 package repl; // Read-Evaluate-Print Loop
 
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+
 import core.*;
 
 final class Main {
@@ -84,18 +86,25 @@ final class Main {
         System.out.println(workingDir.delete("foo.txt"));
         System.out.println(workingDir.delete("a.txt", "b.txt"));
 
-        System.out.println(workingDir.move(".", "a.txt", ".", "haha.txt"));
-        System.out.println(workingDir.move(".", "a.txt", "abc/", "haha.txt"));
-        System.out.println(workingDir.move(".", "ghi/", "abc/", "ihj"));
-        System.out.println(workingDir.move("abc/", new String[] { "a.txt",
-                "b.txt", "c.txt" }));
+        ErrorCode result = ErrorCode.UNKOWN_ERROR;
+        try {
+            result = workingDir.move(".", "a.txt", ".", "haha.txt").get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        // // TESTING UNDERWAY:
+        // System.out.println(workingDir.move(".", "a.txt", "abc/", "haha.txt"));
+        // System.out.println(workingDir.move(".", "ghi/", "abc/", "ihj"));
+        // System.out.println(workingDir.move("abc/", new String[] { "a.txt",
+        // "b.txt", "c.txt" }));
 
-        System.out.println(workingDir.rename("foo.txt", "bar.txt"));
+        // System.out.println(workingDir.rename("foo.txt", "bar.txt"));
 
-        System.out.println(workingDir.copy(".", "a.txt", ".", "haha.txt"));
-        System.out.println(workingDir.copy(".", "a.txt", "abc/", "haha.txt"));
-        System.out.println(workingDir.copy("abc/", new String[] { "a.txt", "b.txt",
-                "c.txt" }));
-        System.out.println(workingDir.copy(".", "abc/", "def/", "newABC/"));
+        // System.out.println(workingDir.copy(".", "a.txt", ".", "haha.txt"));
+        // System.out.println(workingDir.copy(".", "a.txt", "abc/", "haha.txt"));
+        // System.out.println(workingDir.copy("abc/", new String[] { "a.txt", "b.txt",
+        // "c.txt" }));
+        // System.out.println(workingDir.copy(".", "abc/", "def/", "newABC/"));
     }
 }

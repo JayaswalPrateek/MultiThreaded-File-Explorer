@@ -220,8 +220,9 @@ public final class FolderImpl implements Folder {
     public Future<ErrorCode> copy(final String srcPath, final String srcName, final String destPath,
             final String destName) {
         final Callable<ErrorCode> copyTask = () -> nonAsyncCopy(srcPath, srcName, destPath, destName);
-        return executorService.submit(copyTask);
-
+        Future<ErrorCode> result = executorService.submit(copyTask);
+        executorService.shutdown();
+        return result;
     }
 
     public Future<ErrorCode> copy(final String destination, final String... names) {
@@ -239,6 +240,8 @@ public final class FolderImpl implements Folder {
                         return errorCode;
                 } catch (InterruptedException | ExecutionException e) {
                     return ErrorCode.UNKOWN_ERROR;
+                } finally {
+                    executorService.shutdown();
                 }
             return ErrorCode.SUCCESS;
         });
@@ -276,7 +279,9 @@ public final class FolderImpl implements Folder {
         final Callable<ErrorCode> moveTask = () -> {
             return nonAsyncMove(srcPath, srcName, destPath, destName);
         };
-        return executorService.submit(moveTask);
+        Future<ErrorCode> result = executorService.submit(moveTask);
+        executorService.shutdown();
+        return result;
     }
 
     public Future<ErrorCode> move(final String destination, final String... names) {
@@ -297,6 +302,8 @@ public final class FolderImpl implements Folder {
                         return errorCode;
                 } catch (InterruptedException | ExecutionException e) {
                     return ErrorCode.UNKOWN_ERROR;
+                } finally {
+                    executorService.shutdown();
                 }
             }
             return ErrorCode.SUCCESS;

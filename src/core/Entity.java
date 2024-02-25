@@ -30,12 +30,12 @@ interface Entity {
             for (final String pathAndName : pathsAndNames) {
                 if (DEBUG)
                     System.out.println("TRYING TO LOCK " + pathAndName);
-                while (checkLockingConflicts(pathAndName))
-                    try {
-                        lockedEntities.wait();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
+                // while (checkLockingConflicts(pathAndName)) // simply return conflict errror
+                // try {
+                // lockedEntities.wait();
+                // } catch (InterruptedException e) {
+                // Thread.currentThread().interrupt();
+                // }
                 lockedEntities.computeIfAbsent(pathAndName, k -> new ReentrantLock()).lock();
                 if (DEBUG)
                     System.out.println("LOCKED " + pathAndName);
@@ -53,7 +53,7 @@ interface Entity {
                     if (DEBUG)
                         System.out.println("TRYING TO UNLOCK " + pathAndName);
                     lock.unlock();
-                    lockedEntities.notifyAll();
+                    // lockedEntities.notifyAll();
                     if (DEBUG)
                         System.out.println("UNLOCKED " + pathAndName);
                 } else if (DEBUG)
