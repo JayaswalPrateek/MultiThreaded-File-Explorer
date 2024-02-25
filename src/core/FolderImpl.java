@@ -22,8 +22,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
-import core.Entity.CriticalSectionHandler;
-
 public final class FolderImpl implements Folder {
     private volatile String path, name;
 
@@ -166,7 +164,7 @@ public final class FolderImpl implements Folder {
         return createNewFile(".", newFileNames);
     }
 
-    public ErrorCode nonAsyncCopy(final String srcPath, final String srcName, final String destPath,
+    private ErrorCode nonAsyncCopy(final String srcPath, final String srcName, final String destPath,
             final String destName) {
         final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
                 + srcName;
@@ -219,7 +217,7 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    public Future<ErrorCode> Copy(final String srcPath, final String srcName, final String destPath,
+    public Future<ErrorCode> copy(final String srcPath, final String srcName, final String destPath,
             final String destName) {
         final Callable<ErrorCode> copyTask = () -> nonAsyncCopy(srcPath, srcName, destPath, destName);
         return executorService.submit(copyTask);
