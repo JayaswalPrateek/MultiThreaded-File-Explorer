@@ -5,6 +5,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 interface Folder extends Entity {
     ErrorCode createNewFile(final String destination, final String... newFileName);
 
+    public ErrorCode createNewFile(final String... newFileNames);
+
     ErrorCode copy(final String srcPath, final String srcName, final String destPath, final String destName);
 
     ErrorCode copy(final String destination, final String... names);

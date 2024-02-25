@@ -80,15 +80,11 @@ public final class FolderImpl implements Folder {
     }
 
     public void setPath(final String path) {
-        CriticalSectionHandler.lock(this);
         this.path = path;
-        CriticalSectionHandler.unlock(this);
     }
 
     public void setName(final String name) {
-        CriticalSectionHandler.lock(this);
         this.name = name;
-        CriticalSectionHandler.unlock(this);
     }
 
     public boolean doesExist() {
@@ -130,18 +126,19 @@ public final class FolderImpl implements Folder {
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
         final String[] pathsAndNames = Arrays.stream(names)
-                .map(name -> (destination.equals(".") ? (path + name + '/') : destination) + name)
+                .map(name -> this.getPath() + this.getName() + "/" + (destination.equals(".") ? ""
+                        : destination) + name)
                 .toArray(String[]::new);
         if (CriticalSectionHandler.isLocked(pathsAndNames))
             return ErrorCode.ENTITY_IS_LOCKED;
         CriticalSectionHandler.lock(pathsAndNames);
-        for (final String newFolderName : names) {
+        for (final String newFolderName : pathsAndNames) {
             if (DEBUG)
                 System.out.println(
-                        "CREATING " + (destination.equals(".") ? (path + name + '/') : destination) + newFolderName);
+                        "CREATING " + newFolderName);
             try {
                 Files.createDirectories(
-                        Paths.get((destination.equals(".") ? (path + name + '/') : destination) + newFolderName));
+                        Paths.get(newFolderName));
             } catch (final UnsupportedOperationException e) {
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
             } catch (final java.nio.file.FileAlreadyExistsException e) {
@@ -151,7 +148,7 @@ public final class FolderImpl implements Folder {
             } catch (final Exception e) {
                 return ErrorCode.UNKOWN_ERROR;
             } finally {
-                CriticalSectionHandler.unlock(pathsAndNames);
+                CriticalSectionHandler.unlock(newFolderName);
             }
         }
         return ErrorCode.SUCCESS;
@@ -163,6 +160,10 @@ public final class FolderImpl implements Folder {
 
     public ErrorCode createNewFile(final String destination, final String... newFileNames) {
         return new FileImpl().create(destination, newFileNames);
+    }
+
+    public ErrorCode createNewFile(final String... newFileNames) {
+        return new FileImpl().create(".", newFileNames);
     }
 
     public ErrorCode copy(final String srcPath, final String srcName, final String destPath, final String destName) {
@@ -231,7 +232,6 @@ public final class FolderImpl implements Folder {
                 + (srcName.equals(".") ? "" : srcName);
         final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
                 + (destName.equals(".") ? "" : destName);
-
         if (!Files.exists(Paths.get(srcFileLocation)))
             return ErrorCode.ENTITY_NOT_FOUND;
         if (CriticalSectionHandler.isLocked(srcFileLocation, destFileLocation))

@@ -86,8 +86,8 @@ final class FileImpl implements File {
         if (CriticalSectionHandler.isLocked(pathsAndNames))
             return ErrorCode.ENTITY_IS_LOCKED;
         CriticalSectionHandler.lock(pathsAndNames);
-        if (!(!destination.equals(".")
-                && Files.exists(Paths.get(path + destination)) && Files.isDirectory(Paths.get(path + destination))))
+        if (!destination.equals(".")
+                && (!Files.exists(Paths.get(path + destination)) || !Files.isDirectory(Paths.get(path + destination))))
             return ErrorCode.DIR_NOT_FOUND;
         for (final String newFileNameWithPath : pathsAndNames) {
             if (DEBUG)
@@ -103,7 +103,7 @@ final class FileImpl implements File {
             } catch (final Exception e) {
                 return ErrorCode.UNKOWN_ERROR;
             } finally {
-                CriticalSectionHandler.unlock(pathsAndNames);
+                CriticalSectionHandler.unlock(newFileNameWithPath);
             }
         }
         return ErrorCode.SUCCESS;

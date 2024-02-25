@@ -104,11 +104,11 @@ interface Entity {
         if (CriticalSectionHandler.isLocked(pathsAndNames))
             return ErrorCode.ENTITY_IS_LOCKED;
         CriticalSectionHandler.lock(pathsAndNames);
-        for (final String name : names) {
+        for (final String pathWithName : pathsAndNames) {
             if (DEBUG)
-                System.out.println("DELETING " + destination + name);
+                System.out.println("DELETING " + pathWithName);
             try {
-                Files.delete(Paths.get(destination + name));
+                Files.delete(Paths.get(pathWithName));
             } catch (final NoSuchFileException e) {
                 return ErrorCode.FILE_NOT_FOUND;
             } catch (final java.nio.file.DirectoryNotEmptyException e) {
@@ -118,7 +118,7 @@ interface Entity {
             } catch (final Exception e) {
                 return ErrorCode.UNKOWN_ERROR;
             } finally {
-                CriticalSectionHandler.unlock(pathsAndNames);
+                CriticalSectionHandler.unlock(pathWithName);
             }
         }
         return ErrorCode.SUCCESS;

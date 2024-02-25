@@ -7,8 +7,9 @@ final class Main {
     public static void main(final String[] args) {
         final FolderImpl workingDir = FolderImpl.getInstance();
 
-        System.out.println("You are currently in path=" + workingDir.getPath() + "name=" + workingDir.getName());
+        System.out.println("You are currently in path=" + workingDir.getPath() + " name=" + workingDir.getName());
 
+        // to list all the folders:
         final CopyOnWriteArrayList<String> directoryList = workingDir.listFolders();
         // listFolders(ListOption.SHOW_HIDDEN); to include hidden folders
         System.out.println("Folders in " + System.getProperty("user.home"));
@@ -16,7 +17,7 @@ final class Main {
             System.out.println(entity);
 
         // to list all the files:
-        final CopyOnWriteArrayList<String> fileList = workingDir.listFiles(); //
+        final CopyOnWriteArrayList<String> fileList = workingDir.listFiles();
         // listFiles(ListOption.SHOW_HIDDEN); to include hidden files
         System.out.println("Files in " + System.getProperty("user.home"));
         for (final String entity : fileList)
@@ -32,6 +33,7 @@ final class Main {
                 System.out.println("Found: " + result);
 
         // regexFilter(regexQry, ListOption.SHOW_HIDDEN) to search hidden files too
+        // final String regexQry = "bashrc";
         final CopyOnWriteArrayList<String> resultsWithHiddenFilter = workingDir.regexFilter(regexQry,
                 ListOption.SHOW_HIDDEN);
         if (resultsWithHiddenFilter.isEmpty())
@@ -63,13 +65,15 @@ final class Main {
         System.out.println(workingDir.cd("test"));
 
         System.out.println("Creating multiple folders called abc, def, ghi, jkl in test");
-        System.out.println(workingDir.create(new String[] { "abc", "def", "ghi", "jkl" }));
+        System.out.println(workingDir.create(new String[] { "abc", "def", "ghi",
+                "jkl" }));
 
         System.out.println("Creating file foo.txt in test");
-        System.out.println(workingDir.createNewFile("foo.txt"));
+        System.out.println(workingDir.createNewFile(new String[] { "foo.txt" }));
 
         System.out.println("Creating multiple files a.txt, b.txt, c.txt in test");
-        System.out.println(workingDir.createNewFile("a.txt", "b.txt", "c.txt"));
+        System.out.println(workingDir.createNewFile(new String[] { "a.txt", "b.txt",
+                "c.txt" }));
 
         System.out.println(File.open("foo.txt"));
         System.out.println(File.properties("foo.txt"));
