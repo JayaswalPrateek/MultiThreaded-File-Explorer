@@ -19,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
@@ -166,9 +167,11 @@ public final class FolderImpl implements Folder {
 
     private ErrorCode nonAsyncCopy(final String srcPath, final String srcName, final String destPath,
             final String destName) {
-        final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
+        final String srcFileLocation = this.getPath() + this.getName() + "/"
+                + (srcPath.equals(".") ? "" : srcPath) + (srcPath.endsWith("/") ? "" : "/")
                 + srcName;
-        final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
+        final String destFileLocation = this.getPath() + this.getName() + "/"
+                + (destPath.equals(".") ? "" : destPath) + (destPath.endsWith("/") ? "" : "/")
                 + destName;
         if (!Files.exists(Paths.get(srcFileLocation)))
             return ErrorCode.ENTITY_NOT_FOUND;
@@ -221,7 +224,6 @@ public final class FolderImpl implements Folder {
             final String destName) {
         final Callable<ErrorCode> copyTask = () -> nonAsyncCopy(srcPath, srcName, destPath, destName);
         Future<ErrorCode> result = executorService.submit(copyTask);
-        executorService.shutdown();
         return result;
     }
 
@@ -240,8 +242,6 @@ public final class FolderImpl implements Folder {
                         return errorCode;
                 } catch (InterruptedException | ExecutionException e) {
                     return ErrorCode.UNKOWN_ERROR;
-                } finally {
-                    executorService.shutdown();
                 }
             return ErrorCode.SUCCESS;
         });
@@ -250,8 +250,10 @@ public final class FolderImpl implements Folder {
     private ErrorCode nonAsyncMove(final String srcPath, final String srcName, final String destPath,
             final String destName) {
         final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
+                + (srcPath.endsWith("/") ? "" : "/")
                 + srcName;
         final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
+                + (destPath.endsWith("/") ? "" : "/")
                 + destName;
         if (!Files.exists(Paths.get(srcFileLocation)))
             return ErrorCode.ENTITY_NOT_FOUND;
@@ -280,7 +282,6 @@ public final class FolderImpl implements Folder {
             return nonAsyncMove(srcPath, srcName, destPath, destName);
         };
         Future<ErrorCode> result = executorService.submit(moveTask);
-        executorService.shutdown();
         return result;
     }
 
@@ -302,8 +303,6 @@ public final class FolderImpl implements Folder {
                         return errorCode;
                 } catch (InterruptedException | ExecutionException e) {
                     return ErrorCode.UNKOWN_ERROR;
-                } finally {
-                    executorService.shutdown();
                 }
             }
             return ErrorCode.SUCCESS;
@@ -405,5 +404,19 @@ public final class FolderImpl implements Folder {
             else if (stepIn(segment) == ErrorCode.DIR_NOT_FOUND)
                 return ErrorCode.DIR_NOT_FOUND;
         return ErrorCode.SUCCESS;
+    }
+
+    public void shutdownExecutorService() {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+                if (!executorService.awaitTermination(60, TimeUnit.SECONDS))
+                    System.err.println("Executor service did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }
