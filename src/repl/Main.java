@@ -240,7 +240,7 @@ final class Main {
                     if (argumentArr.length == 0)
                         System.out.println("Missing Arguments");
                     else
-                        System.out.println(workingDir.createNewFile(argumentArr));
+                        System.out.println(workingDir.create(argumentArr));
                 }
 
                 case "cp" -> {
