@@ -299,5 +299,6 @@ final class Main {
             System.out.println();
         }
         sc.close();
+        workingDir.shutdownExecutorService();
     }
 }
