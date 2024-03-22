@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 interface Entity {
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
     static final Set<Character> ILLEGAL_CHARACTERS = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList('/', '\\', ':', '*', '?', '"', '<', '>', '|')));
 
