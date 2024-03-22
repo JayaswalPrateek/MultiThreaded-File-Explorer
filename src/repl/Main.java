@@ -121,6 +121,7 @@ final class Main {
         System.out.println("[touch] Create File");
         System.out.println("[mkdir] Create Folder");
         System.out.println("[cp] copy File/Folder (Destination, names)");
+        System.out.println("[slowcp] non multithreaded copy(for demo purposes)");
         System.out.println("[mv] move File/Folder");
         System.out.println("[rename] Rename File/Folder");
         System.out.println("[rm] Delete File/Folder");
@@ -250,6 +251,16 @@ final class Main {
                         System.out.println("Insufficient Arguments");
                     else
                         System.out.println(workingDir.copy(argumentArr[0],
+                                Arrays.copyOfRange(argumentArr, 1, argumentArr.length)));
+                }
+
+                case "slowcp" -> {
+                    if (argumentArr.length == 0)
+                        System.out.println("Missing Arguments");
+                    else if (argumentArr.length == 1)
+                        System.out.println("Insufficient Arguments");
+                    else
+                        System.out.println(workingDir.nonAsyncCopy(argumentArr[0],
                                 Arrays.copyOfRange(argumentArr, 1, argumentArr.length)));
                 }
 

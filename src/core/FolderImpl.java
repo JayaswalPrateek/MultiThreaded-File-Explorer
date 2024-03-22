@@ -165,7 +165,7 @@ public final class FolderImpl implements Folder {
         return createNewFile(".", newFileNames);
     }
 
-    private ErrorCode nonAsyncCopy(final String srcPath, final String srcName, final String destPath,
+    public ErrorCode nonAsyncCopy(final String srcPath, final String srcName, final String destPath,
             final String destName) {
         final String srcFileLocation = this.getPath() + this.getName() + "/"
                 + (srcPath.equals(".") ? "" : srcPath) + (srcPath.endsWith("/") ? "" : "/")
@@ -216,6 +216,15 @@ public final class FolderImpl implements Folder {
             return ErrorCode.UNKOWN_ERROR;
         } finally {
             CriticalSectionHandler.unlock(srcFileLocation, destFileLocation);
+        }
+        return ErrorCode.SUCCESS;
+    }
+
+    public ErrorCode nonAsyncCopy(final String destination, final String... names) {
+        for (final String name : names) {
+            ErrorCode err = nonAsyncCopy(".", name, destination, name);
+            if (err != ErrorCode.SUCCESS)
+                return err;
         }
         return ErrorCode.SUCCESS;
     }
