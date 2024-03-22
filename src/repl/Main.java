@@ -250,8 +250,8 @@ final class Main {
                     else if (argumentArr.length == 1)
                         System.out.println("Insufficient Arguments");
                     else
-                        System.out.println(workingDir.copy(argumentArr[0],
-                                Arrays.copyOfRange(argumentArr, 1, argumentArr.length)));
+                        System.out.println(workingDir.copy(argumentArr[argumentArr.length - 1],
+                                Arrays.copyOfRange(argumentArr, 0, argumentArr.length - 1)));
                 }
 
                 case "slowcp" -> {
@@ -260,8 +260,8 @@ final class Main {
                     else if (argumentArr.length == 1)
                         System.out.println("Insufficient Arguments");
                     else
-                        System.out.println(workingDir.nonAsyncCopy(argumentArr[0],
-                                Arrays.copyOfRange(argumentArr, 1, argumentArr.length)));
+                        System.out.println(workingDir.nonAsyncCopy(argumentArr[argumentArr.length - 1],
+                                Arrays.copyOfRange(argumentArr, 0, argumentArr.length - 1)));
                 }
 
                 case "mv" -> {
@@ -270,8 +270,8 @@ final class Main {
                     else if (argumentArr.length == 1)
                         System.out.println("Insufficient Arguments");
                     else
-                        System.out.println(workingDir.move(argumentArr[0],
-                                Arrays.copyOfRange(argumentArr, 1, argumentArr.length)));
+                        System.out.println(workingDir.move(argumentArr[argumentArr.length - 1],
+                                Arrays.copyOfRange(argumentArr, 0, argumentArr.length - 1)));
                 }
 
                 case "rename" -> {
