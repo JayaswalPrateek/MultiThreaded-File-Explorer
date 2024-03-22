@@ -151,7 +151,7 @@ final class Main {
 
                 case "cd" -> {
                     if (argumentArr.length == 0)
-                        System.out.println("Missing Arguments");
+                        System.out.println(workingDir.cd());
                     else if (argumentArr.length == 1)
                         System.out.println(workingDir.cd(argumentArr[0]));
                     else if (argumentArr.length > 1)

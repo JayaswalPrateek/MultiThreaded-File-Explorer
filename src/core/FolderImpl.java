@@ -460,6 +460,10 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
+    public ErrorCode cd() {
+        return cd(System.getProperty("user.home"));
+    }
+
     public void shutdownExecutorService() {
         executorService.shutdown();
         try {

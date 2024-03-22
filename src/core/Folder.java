@@ -35,4 +35,7 @@ interface Folder extends Entity {
     ErrorCode stepOut();
 
     ErrorCode cd(final String destination);
+
+    ErrorCode cd();
+
 }
