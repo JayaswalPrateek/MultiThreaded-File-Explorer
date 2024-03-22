@@ -12,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -328,14 +329,15 @@ public final class FolderImpl implements Folder {
             for (final Path path : stream)
                 if (!Files.isDirectory(path))
                     if (opt == ListOption.SHOW_HIDDEN || !Files.isHidden(path))
-                        files.add(path.toString());
+                        files.add(Parser.getName(path.toString()));
         } catch (final IOException | DirectoryIteratorException e) {
             if (DEBUG)
                 e.printStackTrace();
         } catch (final Exception e) {
             System.out.println(ErrorCode.UNKOWN_ERROR);
         }
-        return Parser.getNameFromPathAndName(files);
+        files.sort(Comparator.naturalOrder());
+        return files;
     }
 
     public CopyOnWriteArrayList<String> listFiles() {
@@ -348,14 +350,15 @@ public final class FolderImpl implements Folder {
                 Files::isDirectory)) {
             for (final Path path : stream)
                 if (opt == ListOption.SHOW_HIDDEN || !Files.isHidden(path))
-                    folders.add(path.toString());
+                    folders.add(Parser.getName(path.toString()));
         } catch (final IOException | DirectoryIteratorException e) {
             if (DEBUG)
                 e.printStackTrace();
         } catch (final Exception e) {
             System.out.println(ErrorCode.UNKOWN_ERROR);
         }
-        return Parser.getNameFromPathAndName(folders);
+        folders.sort(Comparator.naturalOrder());
+        return folders;
     }
 
     public CopyOnWriteArrayList<String> listFolders() {
