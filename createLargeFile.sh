@@ -11,11 +11,11 @@ create_large_file() {
 }
 
 # Main script
-filename1="large_file1.dat"
-filename2="large_file2.dat"
-size_gb=5  # Change this to the desired size in gigabytes
+filename1="large_file.dat"
+# filename2="large_file2.dat"
+size_gb=10  # Change this to the desired size in gigabytes
 create_large_file $filename1 $size_gb
 echo "Large file '$filename1' created with size $size_gb GB."
 
-create_large_file $filename2 $size_gb
-echo "Large file '$filename2' created with size $size_gb GB."
+# create_large_file $filename2 $size_gb
+# echo "Large file '$filename2' created with size $size_gb GB."
