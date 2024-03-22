@@ -379,7 +379,10 @@ public final class FolderImpl implements Folder {
             stepOut();
         if (!listFolders().contains(target))
             return ErrorCode.DIR_NOT_FOUND;
-        setPath(getPath() + getName() + '/');
+        if (!(getPath() + getName()).equals("/"))
+            setPath(getPath() + getName() + '/');
+        else
+            setPath("/");
         setName(target);
         return ErrorCode.SUCCESS;
     }
@@ -399,12 +402,35 @@ public final class FolderImpl implements Folder {
     }
 
     private ErrorCode handleAbsolutePath(String destination) {
+        final String savedPath = path, savedName = name;
         if (destination.endsWith("/"))
             destination = destination.substring(0, destination.length() - 1);
         if (!Files.isDirectory(Paths.get(destination)))
-            return ErrorCode.UNKOWN_ERROR;
-        path = Parser.getPath(destination);
-        name = Parser.getName(destination);
+            return ErrorCode.DIR_NOT_FOUND;
+        path = "";
+        name = "/";
+        boolean skipFirst = true;
+        for (final String segment : destination.split("/")) {
+            if (skipFirst) {
+                skipFirst = false;
+                continue;
+            }
+            if (segment.equals("."))
+                continue;
+            else if (segment.equals("..")) {
+                if (stepOut() == ErrorCode.DIR_NOT_FOUND) {
+                    path = savedPath;
+                    name = savedName;
+                    return ErrorCode.DIR_NOT_FOUND;
+                }
+            } else {
+                if (stepIn(segment) == ErrorCode.DIR_NOT_FOUND) {
+                    path = savedPath;
+                    name = savedName;
+                    return ErrorCode.DIR_NOT_FOUND;
+                }
+            }
+        }
         return ErrorCode.SUCCESS;
     }
 
@@ -414,13 +440,11 @@ public final class FolderImpl implements Folder {
         if (destination.equals("/")) {
             path = "";
             name = "/";
+            return ErrorCode.SUCCESS;
         }
-        if ((destination.startsWith("/") || destination.startsWith("~"))
-                && (destination.contains("..") || destination.contains(".")))
-            return ErrorCode.OPERATION_NOT_SUPPORTED;
-        if (destination.startsWith("/"))// doesnt handle .. and .
+        if (destination.startsWith("/"))
             return handleAbsolutePath(destination);
-        if (destination.startsWith("~")) // doesnt handle .. and .
+        if (destination.startsWith("~"))
             return handleAbsolutePath(System.getProperty("user.home") +
                     destination.substring(1));
         for (final String segment : destination.split("/"))
