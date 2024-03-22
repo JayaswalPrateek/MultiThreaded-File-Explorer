@@ -381,6 +381,10 @@ public final class FolderImpl implements Folder {
     public ErrorCode stepIn(final String target) {
         if (DEBUG)
             System.out.println("STEPPING IN FROM PATH=" + path + " NAME=" + name + " TO " + target);
+        if (target.equals("."))
+            return ErrorCode.SUCCESS;
+        else if (target.equals(".."))
+            stepOut();
         if (!listFolders().contains(target))
             return ErrorCode.DIR_NOT_FOUND;
         setPath(getPath() + getName() + '/');
@@ -402,16 +406,41 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    public ErrorCode cd(final String destination) { // doesnt handle a new absolute path and ~
+    private ErrorCode handleAbsolutePath(String destination) {
+        if (destination.endsWith("/"))
+            destination = destination.substring(0, destination.length() - 1);
+        if (!Files.isDirectory(Paths.get(destination)))
+            return ErrorCode.UNKOWN_ERROR;
+        path = Parser.getPath(destination);
+        name = Parser.getName(destination);
+        return ErrorCode.SUCCESS;
+    }
+
+    public ErrorCode cd(final String destination) {
         if (DEBUG)
             System.out.println("CHANGE DIR TO " + destination);
+        if (destination.equals("/")) {
+            path = "";
+            name = "/";
+        }
+        if ((destination.startsWith("/") || destination.startsWith("~"))
+                && (destination.contains("..") || destination.contains(".")))
+            return ErrorCode.OPERATION_NOT_SUPPORTED;
+        if (destination.startsWith("/"))// doesnt handle .. and .
+            return handleAbsolutePath(destination);
+        if (destination.startsWith("~")) // doesnt handle .. and .
+            return handleAbsolutePath(System.getProperty("user.home") +
+                    destination.substring(1));
         for (final String segment : destination.split("/"))
             if (segment.equals("."))
                 continue;
-            else if (segment.equals("..") && stepOut() == ErrorCode.DIR_NOT_FOUND)
-                return ErrorCode.DIR_NOT_FOUND;
-            else if (stepIn(segment) == ErrorCode.DIR_NOT_FOUND)
-                return ErrorCode.DIR_NOT_FOUND;
+            else if (segment.equals("..")) {
+                if (stepOut() == ErrorCode.DIR_NOT_FOUND)
+                    return ErrorCode.DIR_NOT_FOUND;
+            } else {
+                if (stepIn(segment) == ErrorCode.DIR_NOT_FOUND)
+                    return ErrorCode.DIR_NOT_FOUND;
+            }
         return ErrorCode.SUCCESS;
     }
 
