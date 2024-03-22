@@ -28,17 +28,6 @@ public final class FolderImpl implements Folder {
     private volatile String path, name;
 
     private static final class Parser {
-        static CopyOnWriteArrayList<String> getNameFromPathAndName(final CopyOnWriteArrayList<String> entityList) {
-            for (int i = 0; i < entityList.size(); i++) {
-                final String fullPath = entityList.get(i);
-                String nameOnly = fullPath.substring(1 + fullPath.lastIndexOf('/'));
-                if (nameOnly.startsWith("."))
-                    nameOnly = nameOnly.substring(1 + nameOnly.indexOf('.'));
-                entityList.set(i, nameOnly);
-            }
-            return entityList;
-        }
-
         static String getPath(final String pathWithName) {
             return pathWithName.substring(0, 1 + pathWithName.lastIndexOf('/'));
         }
