@@ -217,13 +217,14 @@ final class Main {
                         files = workingDir.listFiles();
                     }
                     if (folders != null && folders.size() != 0) {
-                        System.out.println("Folders in " + workingDir.getPath() + workingDir.getName());
+                        System.out.println("Folders:");
                         for (final String folderName : folders)
                             System.out.println(folderName);
+                        System.out.println();
                     } else
                         System.out.println("No Folders here");
                     if (files != null && files.size() != 0) {
-                        System.out.println("Files in " + workingDir.getPath() + workingDir.getName());
+                        System.out.println("Files:");
                         for (final String fileName : files)
                             System.out.println(fileName);
                     } else

@@ -335,7 +335,7 @@ public final class FolderImpl implements Folder {
         } catch (final Exception e) {
             System.out.println(ErrorCode.UNKOWN_ERROR);
         }
-        return files;
+        return Parser.getNameFromPathAndName(files);
     }
 
     public CopyOnWriteArrayList<String> listFiles() {
@@ -355,7 +355,7 @@ public final class FolderImpl implements Folder {
         } catch (final Exception e) {
             System.out.println(ErrorCode.UNKOWN_ERROR);
         }
-        return folders;
+        return Parser.getNameFromPathAndName(folders);
     }
 
     public CopyOnWriteArrayList<String> listFolders() {
@@ -365,10 +365,10 @@ public final class FolderImpl implements Folder {
     public CopyOnWriteArrayList<String> regexFilter(final String patternString, final ListOption opt) {
         final CopyOnWriteArrayList<String> Filtered = new CopyOnWriteArrayList<String>();
         final Pattern pattern = Pattern.compile(patternString);
-        for (final String candidateFile : Parser.getNameFromPathAndName(listFiles(opt)))
+        for (final String candidateFile : listFiles(opt))
             if (pattern.matcher(candidateFile).matches())
                 Filtered.add(candidateFile);
-        for (final String candidateFolder : Parser.getNameFromPathAndName(listFolders(opt)))
+        for (final String candidateFolder : listFolders(opt))
             if (pattern.matcher(candidateFolder).matches())
                 Filtered.add(candidateFolder);
         return Filtered;
@@ -381,7 +381,7 @@ public final class FolderImpl implements Folder {
     public ErrorCode stepIn(final String target) {
         if (DEBUG)
             System.out.println("STEPPING IN FROM PATH=" + path + " NAME=" + name + " TO " + target);
-        if (!Parser.getNameFromPathAndName(listFolders()).contains(target))
+        if (!listFolders().contains(target))
             return ErrorCode.DIR_NOT_FOUND;
         setPath(getPath() + getName() + '/');
         setName(target);
