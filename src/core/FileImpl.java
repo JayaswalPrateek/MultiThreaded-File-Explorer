@@ -81,13 +81,11 @@ final class FileImpl implements File {
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
         final String path = FolderImpl.getInstance().getPath() + FolderImpl.getInstance().getName() + '/';
-        final String[] pathsAndNames = Arrays.stream(names)
-                .map(name -> path + (destination.equals(".") ? "" : destination) + name).toArray(String[]::new);
+        final String[] pathsAndNames = Arrays.stream(names).map(name -> path + (destination.equals(".") ? "" : destination) + name).toArray(String[]::new);
         if (CriticalSectionHandler.isLocked(pathsAndNames))
             return ErrorCode.ENTITY_IS_LOCKED;
         CriticalSectionHandler.lock(pathsAndNames);
-        if (!destination.equals(".")
-                && (!Files.exists(Paths.get(path + destination)) || !Files.isDirectory(Paths.get(path + destination))))
+        if (!destination.equals(".") && (!Files.exists(Paths.get(path + destination)) || !Files.isDirectory(Paths.get(path + destination))))
             return ErrorCode.DIR_NOT_FOUND;
         for (final String newFileNameWithPath : pathsAndNames) {
             if (DEBUG)
