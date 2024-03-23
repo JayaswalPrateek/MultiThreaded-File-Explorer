@@ -16,7 +16,7 @@ interface Folder extends Entity {
 
     Future<ErrorCode> move(final String destination, final String... names);
 
-    Future<ErrorCode> rename(final String oldName, final String newName);
+    ErrorCode rename(final String oldName, final String newName);
 
     CopyOnWriteArrayList<String> listFiles(final ListOption opt);
 

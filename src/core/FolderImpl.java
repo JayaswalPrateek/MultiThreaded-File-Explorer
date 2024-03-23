@@ -255,6 +255,15 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
+    public ErrorCode nonAsyncMove(final String destination, final String... names) {
+        for (final String name : names) {
+            ErrorCode err = nonAsyncMove(".", name, destination, name);
+            if (err != ErrorCode.SUCCESS)
+                return err;
+        }
+        return ErrorCode.SUCCESS;
+    }
+
     public Future<ErrorCode> move(final String srcPath, final String srcName, final String destPath, final String destName) {
         final Callable<ErrorCode> moveTask = () -> {
             return nonAsyncMove(srcPath, srcName, destPath, destName);
@@ -287,8 +296,8 @@ public final class FolderImpl implements Folder {
         });
     }
 
-    public Future<ErrorCode> rename(final String oldName, final String newName) {
-        return move(".", oldName, ".", newName);
+    public ErrorCode rename(final String oldName, final String newName) {
+        return nonAsyncMove(".", oldName, ".", newName);
     }
 
     public CopyOnWriteArrayList<String> listFiles(final ListOption opt) {
