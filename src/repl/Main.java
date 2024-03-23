@@ -94,10 +94,8 @@ final class Main {
                 case "open" -> {
                     if (argumentArr.length == 0)
                         System.out.println("Missing Arguments");
-                    else if (argumentArr.length == 1)
-                        System.out.println(File.open(argumentArr[0]));
-                    else if (argumentArr.length > 1)
-                        System.out.println("Too many arguments");
+                    else
+                        System.out.println(File.open(argumentArr));
                 }
 
                 case "ls" -> {
