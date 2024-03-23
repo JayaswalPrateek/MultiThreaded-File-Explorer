@@ -18,13 +18,6 @@ interface Entity {
     final static class CriticalSectionHandler {
         private static final ConcurrentHashMap<String, ReentrantLock> lockedEntities = new ConcurrentHashMap<>();
 
-        private static synchronized boolean checkLockingConflicts(final String path) {
-            for (final String lockedPath : lockedEntities.keySet())
-                if (path.startsWith(lockedPath) || lockedPath.startsWith(path))
-                    return true;
-            return false;
-        }
-
         static synchronized void lock(final String... pathsAndNames) {
             for (final String pathAndName : pathsAndNames) {
                 if (DEBUG)
@@ -63,8 +56,7 @@ interface Entity {
                 if (!(lock != null && lock.isLocked())) {
                     if (DEBUG)
                         System.out.println(pathAndName + " NOT LOCKED");
-                    if (!checkLockingConflicts(pathAndName))
-                        return false;
+                    return false;
                 }
             }
             if (DEBUG)
