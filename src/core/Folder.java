@@ -37,5 +37,4 @@ interface Folder extends Entity {
     ErrorCode cd(final String destination);
 
     ErrorCode cd();
-
 }

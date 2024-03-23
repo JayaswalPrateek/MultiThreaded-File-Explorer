@@ -93,15 +93,19 @@ final class FileImpl implements File {
             try {
                 Files.createFile(Paths.get(newFileNameWithPath));
             } catch (final UnsupportedOperationException e) {
+                CriticalSectionHandler.unlock(pathsAndNames);
                 return ErrorCode.OPERATION_NOT_SUPPORTED;
             } catch (final java.nio.file.FileAlreadyExistsException e) {
+                CriticalSectionHandler.unlock(pathsAndNames);
                 // return ErrorCode.FILE_ALREADY_EXISTS; // implies we replace existing
             } catch (final IOException e) {
+                CriticalSectionHandler.unlock(pathsAndNames);
                 return ErrorCode.IO_ERROR;
             } catch (final Exception e) {
+                CriticalSectionHandler.unlock(pathsAndNames);
                 return ErrorCode.UNKOWN_ERROR;
             } finally {
-                CriticalSectionHandler.unlock(pathsAndNames);
+                CriticalSectionHandler.unlock(newFileNameWithPath);
             }
         }
         return ErrorCode.SUCCESS;
