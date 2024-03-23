@@ -39,8 +39,7 @@ public final class FolderImpl implements Folder {
 
     private static final String homeDir = System.getProperty("user.home");
     private static final FolderImpl singletonObj = new FolderImpl(Parser.getPath(homeDir), Parser.getName(homeDir));
-    private final ExecutorService executorService = Executors
-            .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public static FolderImpl getInstance() {
         return singletonObj;
@@ -54,8 +53,7 @@ public final class FolderImpl implements Folder {
     }
 
     private FolderImpl(final String pathWithName) {
-        this(pathWithName.substring(0, pathWithName.lastIndexOf('/' + 1)),
-                pathWithName.substring(pathWithName.lastIndexOf('/' + 1)));
+        this(pathWithName.substring(0, pathWithName.lastIndexOf('/' + 1)), pathWithName.substring(pathWithName.lastIndexOf('/' + 1)));
     }
 
     private FolderImpl(final String newName, final FolderImpl obj) {
@@ -116,10 +114,7 @@ public final class FolderImpl implements Folder {
             for (final char ch : name.toCharArray())
                 if (ILLEGAL_CHARACTERS.contains(ch))
                     return ErrorCode.ILLEGAL_NAME;
-        final String[] pathsAndNames = Arrays.stream(names)
-                .map(name -> this.getPath() + this.getName() + "/" + (destination.equals(".") ? ""
-                        : destination) + name)
-                .toArray(String[]::new);
+        final String[] pathsAndNames = Arrays.stream(names).map(name -> this.getPath() + this.getName() + "/" + (destination.equals(".") ? "" : destination) + name).toArray(String[]::new);
         if (CriticalSectionHandler.isLocked(pathsAndNames))
             return ErrorCode.ENTITY_IS_LOCKED;
         CriticalSectionHandler.lock(pathsAndNames);
@@ -155,14 +150,9 @@ public final class FolderImpl implements Folder {
         return createNewFile(".", newFileNames);
     }
 
-    public ErrorCode nonAsyncCopy(final String srcPath, final String srcName, final String destPath,
-            final String destName) {
-        final String srcFileLocation = this.getPath() + this.getName() + "/"
-                + (srcPath.equals(".") ? "" : srcPath) + (srcPath.endsWith("/") ? "" : "/")
-                + srcName;
-        final String destFileLocation = this.getPath() + this.getName() + "/"
-                + (destPath.equals(".") ? "" : destPath) + (destPath.endsWith("/") ? "" : "/")
-                + destName;
+    public ErrorCode nonAsyncCopy(final String srcPath, final String srcName, final String destPath, final String destName) {
+        final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath) + (srcPath.endsWith("/") ? "" : "/") + srcName;
+        final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath) + (destPath.endsWith("/") ? "" : "/") + destName;
         if (!Files.exists(Paths.get(srcFileLocation)))
             return ErrorCode.ENTITY_NOT_FOUND;
         if (CriticalSectionHandler.isLocked(srcFileLocation, destFileLocation))
@@ -172,15 +162,13 @@ public final class FolderImpl implements Folder {
             System.out.println("COPYING " + srcFileLocation + " TO " + destFileLocation);
         try {
             if (Files.isRegularFile(Paths.get(srcFileLocation))) {
-                Files.copy(Paths.get(srcFileLocation), Paths.get(destFileLocation),
-                        StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(Paths.get(srcFileLocation), Paths.get(destFileLocation), StandardCopyOption.REPLACE_EXISTING);
             } else {
                 final Path sourcePath = Paths.get(srcFileLocation);
                 final Path targetPath = Paths.get(destFileLocation);
                 Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
                     @Override
-                    public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
-                            throws IOException {
+                    public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
                         final Path targetDirPath = targetPath.resolve(sourcePath.relativize(dir));
                         if (!Files.exists(targetDirPath))
                             Files.createDirectories(targetDirPath);
@@ -188,10 +176,8 @@ public final class FolderImpl implements Folder {
                     }
 
                     @Override
-                    public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs)
-                            throws IOException {
-                        Files.copy(file, targetPath.resolve(sourcePath.relativize(file)),
-                                StandardCopyOption.REPLACE_EXISTING);
+                    public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+                        Files.copy(file, targetPath.resolve(sourcePath.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
                         return FileVisitResult.CONTINUE;
                     }
                 });
@@ -219,8 +205,7 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    public Future<ErrorCode> copy(final String srcPath, final String srcName, final String destPath,
-            final String destName) {
+    public Future<ErrorCode> copy(final String srcPath, final String srcName, final String destPath, final String destName) {
         final Callable<ErrorCode> copyTask = () -> nonAsyncCopy(srcPath, srcName, destPath, destName);
         Future<ErrorCode> result = executorService.submit(copyTask);
         return result;
@@ -246,14 +231,9 @@ public final class FolderImpl implements Folder {
         });
     }
 
-    private ErrorCode nonAsyncMove(final String srcPath, final String srcName, final String destPath,
-            final String destName) {
-        final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath)
-                + (srcPath.endsWith("/") ? "" : "/")
-                + srcName;
-        final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath)
-                + (destPath.endsWith("/") ? "" : "/")
-                + destName;
+    private ErrorCode nonAsyncMove(final String srcPath, final String srcName, final String destPath, final String destName) {
+        final String srcFileLocation = this.getPath() + this.getName() + "/" + (srcPath.equals(".") ? "" : srcPath) + (srcPath.endsWith("/") ? "" : "/") + srcName;
+        final String destFileLocation = this.getPath() + this.getName() + "/" + (destPath.equals(".") ? "" : destPath) + (destPath.endsWith("/") ? "" : "/") + destName;
         if (!Files.exists(Paths.get(srcFileLocation)))
             return ErrorCode.ENTITY_NOT_FOUND;
         if (CriticalSectionHandler.isLocked(srcFileLocation, destFileLocation))
@@ -275,8 +255,7 @@ public final class FolderImpl implements Folder {
         return ErrorCode.SUCCESS;
     }
 
-    public Future<ErrorCode> move(final String srcPath, final String srcName, final String destPath,
-            final String destName) {
+    public Future<ErrorCode> move(final String srcPath, final String srcName, final String destPath, final String destName) {
         final Callable<ErrorCode> moveTask = () -> {
             return nonAsyncMove(srcPath, srcName, destPath, destName);
         };
@@ -335,8 +314,7 @@ public final class FolderImpl implements Folder {
 
     public CopyOnWriteArrayList<String> listFolders(final ListOption opt) {
         final CopyOnWriteArrayList<String> folders = new CopyOnWriteArrayList<>();
-        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name),
-                Files::isDirectory)) {
+        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name), Files::isDirectory)) {
             for (final Path path : stream)
                 if (opt == ListOption.SHOW_HIDDEN || !Files.isHidden(path))
                     folders.add(Parser.getName(path.toString()));
@@ -445,17 +423,23 @@ public final class FolderImpl implements Folder {
         if (destination.startsWith("/"))
             return handleAbsolutePath(destination);
         if (destination.startsWith("~"))
-            return handleAbsolutePath(System.getProperty("user.home") +
-                    destination.substring(1));
+            return handleAbsolutePath(System.getProperty("user.home") + destination.substring(1));
+        final String savedPath = path, savedName = name;
         for (final String segment : destination.split("/"))
             if (segment.equals("."))
                 continue;
             else if (segment.equals("..")) {
-                if (stepOut() == ErrorCode.DIR_NOT_FOUND)
+                if (stepOut() == ErrorCode.DIR_NOT_FOUND) {
+                    path = savedPath;
+                    name = savedName;
                     return ErrorCode.DIR_NOT_FOUND;
+                }
             } else {
-                if (stepIn(segment) == ErrorCode.DIR_NOT_FOUND)
+                if (stepIn(segment) == ErrorCode.DIR_NOT_FOUND) {
+                    path = savedPath;
+                    name = savedName;
                     return ErrorCode.DIR_NOT_FOUND;
+                }
             }
         return ErrorCode.SUCCESS;
     }
