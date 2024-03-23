@@ -335,11 +335,10 @@ public final class FolderImpl implements Folder {
 
     public CopyOnWriteArrayList<String> listFiles(final ListOption opt) {
         final CopyOnWriteArrayList<String> files = new CopyOnWriteArrayList<>();
-        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name))) {
+        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path + name), Files::isRegularFile)) {
             for (final Path path : stream)
-                if (!Files.isDirectory(path))
-                    if (opt == ListOption.SHOW_HIDDEN || !Files.isHidden(path))
-                        files.add(Parser.getName(path.toString()));
+                if (opt == ListOption.SHOW_HIDDEN || !Files.isHidden(path))
+                    files.add(Parser.getName(path.toString()));
         } catch (final IOException | DirectoryIteratorException e) {
             if (DEBUG)
                 e.printStackTrace();
