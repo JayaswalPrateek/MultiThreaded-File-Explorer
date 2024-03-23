@@ -13,8 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 interface Entity {
     static final boolean DEBUG = false;
-    static final Set<Character> ILLEGAL_CHARACTERS = Collections
-            .unmodifiableSet(new HashSet<>(Arrays.asList('/', '\\', ':', '*', '?', '"', '<', '>', '|')));
+    static final Set<Character> ILLEGAL_CHARACTERS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList('/', '\\', ':', '*', '?', '"', '<', '>', '|')));
 
     final static class CriticalSectionHandler {
         private static final ConcurrentHashMap<String, ReentrantLock> lockedEntities = new ConcurrentHashMap<>();
@@ -30,12 +29,6 @@ interface Entity {
             for (final String pathAndName : pathsAndNames) {
                 if (DEBUG)
                     System.out.println("TRYING TO LOCK " + pathAndName);
-                // while (checkLockingConflicts(pathAndName)) // simply return conflict errror
-                // try {
-                // lockedEntities.wait();
-                // } catch (InterruptedException e) {
-                // Thread.currentThread().interrupt();
-                // }
                 lockedEntities.computeIfAbsent(pathAndName, k -> new ReentrantLock()).lock();
                 if (DEBUG)
                     System.out.println("LOCKED " + pathAndName);
@@ -53,7 +46,6 @@ interface Entity {
                     if (DEBUG)
                         System.out.println("TRYING TO UNLOCK " + pathAndName);
                     lock.unlock();
-                    // lockedEntities.notifyAll();
                     if (DEBUG)
                         System.out.println("UNLOCKED " + pathAndName);
                 } else if (DEBUG)
@@ -71,7 +63,8 @@ interface Entity {
                 if (!(lock != null && lock.isLocked())) {
                     if (DEBUG)
                         System.out.println(pathAndName + " NOT LOCKED");
-                    return false;
+                    if (!checkLockingConflicts(pathAndName))
+                        return false;
                 }
             }
             if (DEBUG)
