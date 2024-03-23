@@ -234,17 +234,17 @@ public final class FolderImpl implements Folder {
 
     public Future<ErrorCode> copy(final String srcPath, final String srcName, final String destPath, final String destName) {
         final Callable<ErrorCode> copyTask = () -> nonAsyncCopy(srcPath, srcName, destPath, destName);
-        Future<ErrorCode> result = executorService.submit(copyTask);
-        futureWorkStats.put("cp " + srcPath + srcName + " " + destPath + destName, result);
-        return result;
+        Future<ErrorCode> futureResult = executorService.submit(copyTask);
+        futureWorkStats.put("cp " + srcPath + srcName + " " + destPath + destName, futureResult);
+        return futureResult;
     }
 
     public Future<ErrorCode> copy(final String destination, final String... names) {
         final List<Future<ErrorCode>> futures = new ArrayList<>();
         for (final String name : names) {
-            final Future<ErrorCode> future = executorService.submit(() -> nonAsyncCopy(".", name, destination, name));
-            futureWorkStats.put("cp " + getPath() + getName() + name + " " + destination + name, future);
-            futures.add(future);
+            final Future<ErrorCode> futureResult = executorService.submit(() -> nonAsyncCopy(".", name, destination, name));
+            futureWorkStats.put("cp " + getPath() + getName() + name + " " + destination + name, futureResult);
+            futures.add(futureResult);
         }
 
         return executorService.submit(() -> {
@@ -299,20 +299,20 @@ public final class FolderImpl implements Folder {
         final Callable<ErrorCode> moveTask = () -> {
             return nonAsyncMove(srcPath, srcName, destPath, destName);
         };
-        Future<ErrorCode> result = executorService.submit(moveTask);
-        futureWorkStats.put("mv " + srcPath + srcName + " " + destPath + destName, result);
-        return result;
+        Future<ErrorCode> futureResult = executorService.submit(moveTask);
+        futureWorkStats.put("mv " + srcPath + srcName + " " + destPath + destName, futureResult);
+        return futureResult;
     }
 
     public Future<ErrorCode> move(final String destination, final String... names) {
         final List<Future<ErrorCode>> futures = new ArrayList<>();
 
         for (final String name : names) {
-            final Future<ErrorCode> future = executorService.submit(() -> {
+            final Future<ErrorCode> futureResult = executorService.submit(() -> {
                 return nonAsyncMove(".", name, destination, name);
             });
-            futureWorkStats.put("mv " + getPath() + getName() + name + " " + destination + name, future);
-            futures.add(future);
+            futureWorkStats.put("mv " + getPath() + getName() + name + " " + destination + name, futureResult);
+            futures.add(futureResult);
         }
 
         return executorService.submit(() -> {
