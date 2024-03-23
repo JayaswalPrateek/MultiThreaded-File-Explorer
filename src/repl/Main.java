@@ -19,6 +19,7 @@ final class Main {
         System.out.println("[cp] copy File/Folder (Destination, names)");
         System.out.println("[slowcp] non multithreaded copy(for demo purposes)");
         System.out.println("[mv] move File/Folder");
+        System.out.println("[iostat] see progress of concurrent cp/mv jobs");
         System.out.println("[rename] Rename File/Folder");
         System.out.println("[rm] Delete File/Folder");
         System.out.println("[clear] Clears screen");
@@ -168,6 +169,8 @@ final class Main {
                     else
                         System.out.println(workingDir.move(argumentArr[argumentArr.length - 1], Arrays.copyOfRange(argumentArr, 0, argumentArr.length - 1)));
                 }
+
+                case "iostat" -> workingDir.getIoStat();
 
                 case "rename" -> {
                     if (argumentArr.length == 0)

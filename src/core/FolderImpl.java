@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -40,6 +41,7 @@ public final class FolderImpl implements Folder {
     private static final String homeDir = System.getProperty("user.home");
     private static final FolderImpl singletonObj = new FolderImpl(Parser.getPath(homeDir), Parser.getName(homeDir));
     private final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private final ConcurrentHashMap<String, Future<ErrorCode>> futureWorkStats = new ConcurrentHashMap<>();
 
     public static FolderImpl getInstance() {
         return singletonObj;
@@ -66,6 +68,24 @@ public final class FolderImpl implements Folder {
 
     public String getName() {
         return name;
+    }
+
+    public void getIoStat() {
+        if (futureWorkStats.isEmpty()) {
+            System.out.println("spawn cp/mv operation to see log");
+            return;
+        }
+        futureWorkStats.forEach((key, future) -> {
+            if (future.isDone())
+                try {
+                    ErrorCode errorCode = future.get();
+                    System.out.println("Completed Job: " + key.replace(",", " ") + " which returned: " + errorCode);
+                } catch (final InterruptedException | ExecutionException e) {
+                    System.out.println("Error occurred while getting future result: " + e.getMessage());
+                }
+            else
+                System.out.println("Running Job: " + key.split(","));
+        });
     }
 
     public void setPath(final String path) {
@@ -182,6 +202,8 @@ public final class FolderImpl implements Folder {
                     }
                 });
             }
+        } catch (final java.nio.file.NoSuchFileException e) {
+            return ErrorCode.FILE_NOT_FOUND;
         } catch (final UnsupportedOperationException e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
         } catch (final java.nio.file.FileAlreadyExistsException e) {
@@ -208,6 +230,7 @@ public final class FolderImpl implements Folder {
     public Future<ErrorCode> copy(final String srcPath, final String srcName, final String destPath, final String destName) {
         final Callable<ErrorCode> copyTask = () -> nonAsyncCopy(srcPath, srcName, destPath, destName);
         Future<ErrorCode> result = executorService.submit(copyTask);
+        futureWorkStats.put("cp " + srcPath + srcName + " " + destPath + destName, result);
         return result;
     }
 
@@ -215,6 +238,7 @@ public final class FolderImpl implements Folder {
         final List<Future<ErrorCode>> futures = new ArrayList<>();
         for (final String name : names) {
             final Future<ErrorCode> future = executorService.submit(() -> nonAsyncCopy(".", name, destination, name));
+            futureWorkStats.put("cp " + getPath() + getName() + name + " " + destination + name, future);
             futures.add(future);
         }
 
@@ -224,7 +248,7 @@ public final class FolderImpl implements Folder {
                     ErrorCode errorCode = future.get();
                     if (errorCode != ErrorCode.SUCCESS)
                         return errorCode;
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (final InterruptedException | ExecutionException e) {
                     return ErrorCode.UNKOWN_ERROR;
                 }
             return ErrorCode.SUCCESS;
@@ -243,11 +267,13 @@ public final class FolderImpl implements Folder {
             System.out.println("MOVING " + srcFileLocation + " TO " + destFileLocation);
         try {
             Files.move(Path.of(srcFileLocation), Path.of(destFileLocation), StandardCopyOption.REPLACE_EXISTING);
-        } catch (UnsupportedOperationException e) {
+        } catch (final java.nio.file.NoSuchFileException e) {
+            return ErrorCode.FILE_NOT_FOUND;
+        } catch (final UnsupportedOperationException e) {
             return ErrorCode.OPERATION_NOT_SUPPORTED;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return ErrorCode.IO_ERROR;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return ErrorCode.UNKOWN_ERROR;
         } finally {
             CriticalSectionHandler.unlock(srcFileLocation, destFileLocation);
@@ -269,6 +295,7 @@ public final class FolderImpl implements Folder {
             return nonAsyncMove(srcPath, srcName, destPath, destName);
         };
         Future<ErrorCode> result = executorService.submit(moveTask);
+        futureWorkStats.put("mv " + srcPath + srcName + " " + destPath + destName, result);
         return result;
     }
 
@@ -279,6 +306,7 @@ public final class FolderImpl implements Folder {
             final Future<ErrorCode> future = executorService.submit(() -> {
                 return nonAsyncMove(".", name, destination, name);
             });
+            futureWorkStats.put("mv " + getPath() + getName() + name + " " + destination + name, future);
             futures.add(future);
         }
 
@@ -288,7 +316,7 @@ public final class FolderImpl implements Folder {
                     final ErrorCode errorCode = future.get();
                     if (errorCode != ErrorCode.SUCCESS)
                         return errorCode;
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (final InterruptedException | ExecutionException e) {
                     return ErrorCode.UNKOWN_ERROR;
                 }
             }
@@ -465,7 +493,7 @@ public final class FolderImpl implements Folder {
                 if (!executorService.awaitTermination(60, TimeUnit.SECONDS))
                     System.err.println("Executor service did not terminate");
             }
-        } catch (InterruptedException ie) {
+        } catch (final InterruptedException ie) {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
