@@ -108,15 +108,19 @@ interface Entity {
             try {
                 Files.delete(Paths.get(pathWithName));
             } catch (final NoSuchFileException e) {
+                CriticalSectionHandler.unlock(pathsAndNames);
                 return ErrorCode.FILE_NOT_FOUND;
             } catch (final java.nio.file.DirectoryNotEmptyException e) {
+                CriticalSectionHandler.unlock(pathsAndNames);
                 return ErrorCode.DIR_NOT_EMPTY;
             } catch (final IOException e) {
+                CriticalSectionHandler.unlock(pathsAndNames);
                 return ErrorCode.IO_ERROR;
             } catch (final Exception e) {
+                CriticalSectionHandler.unlock(pathsAndNames);
                 return ErrorCode.UNKOWN_ERROR;
             } finally {
-                CriticalSectionHandler.unlock(pathsAndNames);
+                CriticalSectionHandler.unlock(pathWithName);
             }
         }
         return ErrorCode.SUCCESS;
