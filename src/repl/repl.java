@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-final class Main {
+final class repl {
     private static void showHelp() {
         System.out.println("Options:");
         System.out.println("[pwd] Print Working Directory");
@@ -28,8 +28,9 @@ final class Main {
         System.out.println("");
     }
 
+    final static FolderImpl workingDir = core.FolderImpl.getInstance();
+
     public static void main(final String[] args) {
-        final FolderImpl workingDir = FolderImpl.getInstance();
         final Scanner sc = new Scanner(System.in);
         showHelp();
         outer: while (true) {
@@ -146,7 +147,8 @@ final class Main {
                     else if (argumentArr.length == 1)
                         System.out.println("Insufficient Arguments");
                     else {
-                        System.out.println(workingDir.copy(argumentArr[argumentArr.length - 1], Arrays.copyOfRange(argumentArr, 0, argumentArr.length - 1)));
+                        System.out.println(workingDir.copy(argumentArr[argumentArr.length - 1],
+                                Arrays.copyOfRange(argumentArr, 0, argumentArr.length - 1)));
                     }
                 }
 
@@ -156,7 +158,8 @@ final class Main {
                     else if (argumentArr.length == 1)
                         System.out.println("Insufficient Arguments");
                     else
-                        System.out.println(workingDir.nonAsyncCopy(argumentArr[argumentArr.length - 1], Arrays.copyOfRange(argumentArr, 0, argumentArr.length - 1)));
+                        System.out.println(workingDir.nonAsyncCopy(argumentArr[argumentArr.length - 1],
+                                Arrays.copyOfRange(argumentArr, 0, argumentArr.length - 1)));
                 }
 
                 case "mv" -> {
@@ -165,7 +168,8 @@ final class Main {
                     else if (argumentArr.length == 1)
                         System.out.println("Insufficient Arguments");
                     else
-                        System.out.println(workingDir.move(argumentArr[argumentArr.length - 1], Arrays.copyOfRange(argumentArr, 0, argumentArr.length - 1)));
+                        System.out.println(workingDir.move(argumentArr[argumentArr.length - 1],
+                                Arrays.copyOfRange(argumentArr, 0, argumentArr.length - 1)));
                 }
 
                 case "iostat" -> workingDir.getIoStat();
